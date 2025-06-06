@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
-import { CommonModule, KeyValuePipe } from '@angular/common'; // KeyValuePipe for dynamic sections in HTML
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-// Angular Material Imports
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -12,25 +10,17 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { Router } from '@angular/router';
 
-// Routing (for potential routerLink in template)
-import { RouterModule } from '@angular/router';
-
-// Service and Model Imports (paths are relative to this component)
 import { CompanyProfileService } from '../../../../data/company-profile.service';
- // Path from `pages/generator-page` to `data`
-import { CompanyProfile, ProfileGenerationRequest } from '../../../../../../shared/models/company-profile.model'; // Path from `pages/generator-page` to `shared/models`
+import { CompanyProfile, ProfileGenerationRequest } from '../../../../../../shared/models/company-profile.model';
 import { ProfileViewerDialogComponent } from '../../../profile-viewer/dialogs/profile-viewer-dialog/profile-viewer-dialog.component';
 
-// Import the standalone dialog component
-
-
-
 @Component({
-  selector: 'app-generator-page', // Selector should match the new component name
+  selector: 'app-generator-page',
   templateUrl: './generator-page.component.html',
   styleUrls: ['./generator-page.component.scss'],
-  standalone: true, // This component is standalone
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -42,8 +32,7 @@ import { ProfileViewerDialogComponent } from '../../../profile-viewer/dialogs/pr
     MatDividerModule,
     MatSnackBarModule,
     MatIconModule,
-    MatFormFieldModule,
-    RouterModule, // For routerLink in the template
+    MatFormFieldModule
   ]
 })
 export class GeneratorPageComponent {
@@ -54,6 +43,7 @@ export class GeneratorPageComponent {
   constructor(
     private companyProfileService: CompanyProfileService,
     private snackBar: MatSnackBar,
+    private router: Router,
     public dialog: MatDialog
   ) {}
 
@@ -95,12 +85,16 @@ export class GeneratorPageComponent {
   }
 
   openProfileDialog(profile: CompanyProfile): void {
-    this.dialog.open(ProfileViewerDialogComponent, { // Use the dedicated dialog component
+    const dialogRef = this.dialog.open(ProfileViewerDialogComponent, {
       width: '90vw',
       maxWidth: '900px',
       data: profile,
       disableClose: true,
       panelClass: 'profile-viewer-dialog-panel'
+    });
+
+    dialogRef.componentInstance.editProfile.subscribe((profileId: string) => {
+      this.router.navigate(['/company/edit', profileId]);
     });
   }
 

@@ -1,24 +1,21 @@
 <h2 mat-dialog-title class="dialog-title">
-  <!-- Company Name in the header -->
-  <div class="flex items-center">
-    <!-- Use optional chaining for logoUrl and fallback to a placeholder -->
-    <img [src]="data.basicInfo?.logoUrl || 'https://placehold.co/50x50/cccccc/ffffff?text=Logo'" alt="Company Logo" class="w-12 h-12 rounded-full mr-4 object-contain">
-    <!-- Use optional chaining and fallbacks for legalName/tradingName -->
-    {{ data.basicInfo?.legalName || data.basicInfo?.tradingName || 'Company Profile' }}
+  <div class="company-info">
+    <div class="logo-container">
+      <img [src]="data.basicInfo?.logoUrl || 'https://placehold.co/200x200/cccccc/ffffff?text=Logo'" 
+           alt="Company Logo">
+    </div>
+    <div class="company-details">
+      <div class="company-name">{{ data.basicInfo?.legalName || data.basicInfo?.tradingName || 'Company Profile' }}</div>
+      <div class="company-tagline" *ngIf="data.descriptive?.tagline">{{ data.descriptive.tagline }}</div>
+    </div>
   </div>
-  <!-- Close button -->
-  <button mat-icon-button (click)="dialogRef.close()" class="dialog-close-button">
+  <button mat-icon-button class="dialog-close-button" (click)="dialogRef.close()">
     <mat-icon>close</mat-icon>
   </button>
 </h2>
 
 <mat-dialog-content class="mat-typography dialog-content-scrollable">
-  <div class="p-4">
-    <!-- Use optional chaining for tagline -->
-    <p class="text-blue-700 text-lg font-semibold mb-4">{{ data.descriptive?.tagline || 'N/A' }}</p>
-
-    <mat-divider class="my-6"></mat-divider>
-
+  <div class="content-wrapper">
     <!-- General Overview -->
     <mat-card class="section-card">
       <mat-card-header>
@@ -27,18 +24,32 @@
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <!-- Use optional chaining for description -->
-        <p class="text-gray-700 text-base leading-relaxed mb-3">{{ data.descriptive?.description || 'No description available.' }}</p>
-        <mat-divider class="my-3"></mat-divider>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700 text-sm">
-          <div><span class="font-semibold">Legal Name:</span> {{ data.basicInfo?.legalName || 'N/A' }}</div>
-          <div *ngIf="data.basicInfo?.tradingName"><span class="font-semibold">Trading Name:</span> {{ data.basicInfo.tradingName }}</div>
-          <div *ngIf="data.basicInfo?.dba"><span class="font-semibold">DBA:</span> {{ data.basicInfo.dba }}</div>
-          <!-- Use optional chaining for foundedDate and its pipe -->
-          <div *ngIf="data.basicInfo?.foundedDate"><span class="font-semibold">Founded:</span> {{ data.basicInfo.foundedDate | date:'mediumDate' }}</div>
-          <div *ngIf="data.basicInfo?.companyType"><span class="font-semibold">Type:</span> {{ data.basicInfo.companyType | titlecase }}</div>
-          <!-- Use optional chaining and nullish coalescing for industryCodes.join -->
-          <div *ngIf="data.basicInfo?.industryCodes?.length"><span class="font-semibold">Industry Codes:</span> {{ data.basicInfo.industryCodes?.join(', ') }}</div>
+        <p class="text-gray-700 text-base leading-relaxed mb-6">{{ data.descriptive?.description || 'No description available.' }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="info-item" *ngIf="data.basicInfo?.legalName">
+            <span class="font-semibold">Legal Name</span>
+            {{ data.basicInfo.legalName }}
+          </div>
+          <div class="info-item" *ngIf="data.basicInfo?.tradingName">
+            <span class="font-semibold">Trading Name</span>
+            {{ data.basicInfo.tradingName }}
+          </div>
+          <div class="info-item" *ngIf="data.basicInfo?.dba">
+            <span class="font-semibold">DBA</span>
+            {{ data.basicInfo.dba }}
+          </div>
+          <div class="info-item" *ngIf="data.basicInfo?.foundedDate">
+            <span class="font-semibold">Founded</span>
+            {{ data.basicInfo.foundedDate | date:'mediumDate' }}
+          </div>
+          <div class="info-item" *ngIf="data.basicInfo?.companyType">
+            <span class="font-semibold">Type</span>
+            {{ data.basicInfo.companyType | titlecase }}
+          </div>
+          <div class="info-item" *ngIf="data.basicInfo?.industryCodes?.length">
+            <span class="font-semibold">Industry Codes</span>
+            {{ data.basicInfo.industryCodes?.join(', ') }}
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
@@ -51,15 +62,17 @@
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div *ngIf="data.descriptive?.mission" class="mb-3">
-          <span class="font-semibold text-gray-800">Mission:</span> {{ data.descriptive.mission }}
+        <div *ngIf="data.descriptive?.mission" class="mb-4">
+          <h4 class="font-semibold text-lg mb-2">Mission</h4>
+          <p class="text-gray-700">{{ data.descriptive.mission }}</p>
         </div>
-        <div *ngIf="data.descriptive?.vision" class="mb-3">
-          <span class="font-semibold text-gray-800">Vision:</span> {{ data.descriptive.vision }}
+        <div *ngIf="data.descriptive?.vision" class="mb-4">
+          <h4 class="font-semibold text-lg mb-2">Vision</h4>
+          <p class="text-gray-700">{{ data.descriptive.vision }}</p>
         </div>
         <div *ngIf="data.descriptive?.coreValues?.length">
-          <span class="font-semibold text-gray-800">Core Values:</span>
-          <ul class="list-disc list-inside ml-4 mt-1 text-gray-700 text-base">
+          <h4 class="font-semibold text-lg mb-2">Core Values</h4>
+          <ul>
             <li *ngFor="let value of data.descriptive.coreValues">{{ value }}</li>
           </ul>
         </div>
@@ -75,26 +88,38 @@
       </mat-card-header>
       <mat-card-content>
         <!-- Use optional chaining for headquarters.address -->
-        <div *ngIf="data.operational?.headquarters" class="mb-3">
-          <span class="font-semibold">Headquarters:</span> {{ data.operational.headquarters.address }}
-        </div>
-        <div *ngIf="data.operational?.employeeCount">
-          <span class="font-semibold">Employees:</span> {{ data.operational.employeeCount }} ({{ data.operational.employeeRange }})
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="info-item" *ngIf="data.operational?.headquarters">
+            <span class="font-semibold">Headquarters:</span>
+            <p class="mt-1">{{ data.operational.headquarters.address }}</p>
+          </div>
+          <div class="info-item" *ngIf="data.operational?.employeeCount">
+            <span class="font-semibold">Employees:</span>
+            <p class="mt-1">{{ data.operational.employeeCount }} ({{ data.operational.employeeRange }})</p>
+          </div>
         </div>
         <!-- Use optional chaining for operatingCountries.join -->
-        <div *ngIf="data.operational?.operatingCountries?.length" class="mt-3">
-          <span class="font-semibold">Operating Countries:</span> {{ data.operational.operatingCountries?.join(', ') }}
+        <div *ngIf="data.operational?.operatingCountries?.length" class="mt-4">
+          <span class="font-semibold">Operating Countries:</span>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span *ngFor="let country of data.operational.operatingCountries" 
+                  class="px-3 py-1 bg-blue-50 text-blue-800 rounded-full text-sm">
+              {{ country }}
+            </span>
+          </div>
         </div>
         <!-- Use optional chaining for subsidiaries.join -->
-        <div *ngIf="data.operational?.subsidiaries?.length" class="mt-3">
+        <div *ngIf="data.operational?.subsidiaries?.length" class="mt-4">
           <span class="font-semibold">Subsidiaries:</span> {{ data.operational.subsidiaries?.join(', ') }}
         </div>
-        <div *ngIf="data.operational?.locations?.length">
-          <mat-divider class="my-3"></mat-divider>
+        <div *ngIf="data.operational?.locations?.length" class="mt-4">
           <span class="font-semibold">Other Locations:</span>
-          <ul class="list-disc list-inside ml-4 mt-1 text-gray-700 text-base">
-            <li *ngFor="let loc of data.operational.locations">{{ loc.address }}</li>
-          </ul>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+            <div *ngFor="let loc of data.operational.locations" 
+                 class="p-3 bg-gray-50 rounded-lg">
+              {{ loc.address }}
+            </div>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
@@ -107,29 +132,42 @@
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div *ngIf="data.contact?.primaryPhone" class="mb-2">
-          <span class="font-semibold">Phone:</span> {{ data.contact.primaryPhone }}
-          <span *ngIf="data.contact?.tollFreePhone"> (Toll-Free: {{ data.contact.tollFreePhone }})</span>
-        </div>
-        <div *ngIf="data.contact?.email" class="mb-2">
-          <span class="font-semibold">Email:</span> <a [href]="'mailto:' + data.contact.email" class="text-blue-600 hover:underline">{{ data.contact.email }}</a>
-        </div>
-        <div *ngIf="data.contact?.investorEmail" class="mb-2">
-          <span class="font-semibold">Investor Email:</span> <a [href]="'mailto:' + data.contact.investorEmail" class="text-blue-600 hover:underline">{{ data.contact.investorEmail }}</a>
-        </div>
-        <!-- Use optional chaining for websiteUrl -->
-        <div *ngIf="data.digitalPresence?.websiteUrl" class="mb-2">
-          <span class="font-semibold">Website:</span> <a [href]="data.digitalPresence.websiteUrl" target="_blank" class="text-blue-600 hover:underline">{{ data.digitalPresence.websiteUrl }}</a>
-        </div>
-        <div *ngIf="data.contact?.socialMedia?.length" class="mt-3">
-          <span class="font-semibold">Social Media:</span>
-          <div class="flex flex-wrap gap-3 mt-2">
-            <!-- Use optional chaining for social.followers -->
-            <a *ngFor="let social of data.contact.socialMedia" [href]="social.url" target="_blank" class="flex items-center text-blue-600 hover:underline">
-              <mat-icon class="mr-1 text-base">{{ getSocialIcon(social.platform) }}</mat-icon>
-              {{ social.platform | titlecase }} ({{ social.followers | number }} followers)
-            </a>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div class="info-item" *ngIf="data.contact?.primaryPhone">
+            <span class="font-semibold">Phone:</span>
+            <p class="mt-1">{{ data.contact.primaryPhone }}</p>
+            <p *ngIf="data.contact?.tollFreePhone" class="text-sm text-gray-600">
+              Toll-Free: {{ data.contact.tollFreePhone }}
+            </p>
           </div>
+          <div class="info-item" *ngIf="data.contact?.email">
+            <span class="font-semibold">Email:</span>
+            <p class="mt-1">
+              <a [href]="'mailto:' + data.contact.email">{{ data.contact.email }}</a>
+            </p>
+          </div>
+          <div class="info-item" *ngIf="data.contact?.investorEmail">
+            <span class="font-semibold">Investor Relations:</span>
+            <p class="mt-1">
+              <a [href]="'mailto:' + data.contact.investorEmail">{{ data.contact.investorEmail }}</a>
+            </p>
+          </div>
+          <div class="info-item" *ngIf="data.digitalPresence?.websiteUrl">
+            <span class="font-semibold">Website:</span>
+            <p class="mt-1">
+              <a [href]="data.digitalPresence.websiteUrl" target="_blank">{{ data.digitalPresence.websiteUrl }}</a>
+            </p>
+          </div>
+        </div>
+        <div *ngIf="data.contact?.socialMedia?.length" class="social-media-links">
+          <a *ngFor="let social of data.contact.socialMedia" 
+             [href]="social.url" 
+             target="_blank" 
+             class="social-media-link">
+            <mat-icon>{{ getSocialIcon(social.platform) }}</mat-icon>
+            <span>{{ social.platform | titlecase }}</span>
+            <span class="text-sm text-gray-600 ml-2">({{ social.followers | number }})</span>
+          </a>
         </div>
       </mat-card-content>
     </mat-card>
@@ -142,41 +180,51 @@
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div *ngIf="data.financials?.stockSymbol" class="mb-3">
+        <div *ngIf="data.financials?.stockSymbol" class="mb-4">
           <span class="font-semibold">Stock Symbol:</span> {{ data.financials.stockSymbol }}
         </div>
-        <div *ngIf="data.financials?.financialData?.length" class="mb-3">
-          <h5 class="font-semibold mb-2">Financial Data:</h5>
-          <table class="w-full text-left border-collapse">
+        <div *ngIf="data.financials?.financialData?.length" class="financial-data">
+          <h4 class="font-semibold text-lg mb-3">Financial Data</h4>
+          <table>
             <thead>
-              <tr class="bg-gray-100">
-                <th class="py-2 px-4 border-b">Year</th>
-                <th class="py-2 px-4 border-b">Revenue</th>
-                <th class="py-2 px-4 border-b">Profit</th>
+              <tr>
+                <th>Year</th>
+                <th>Revenue</th>
+                <th>Profit</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let financial of data.financials.financialData" class="hover:bg-gray-50">
-                <td class="py-2 px-4 border-b">{{ financial.year }}</td>
-                <td class="py-2 px-4 border-b">{{ financial.revenue | currency:financial.currency:'symbol':'1.0-0' }}</td>
-                <td class="py-2 px-4 border-b">{{ financial.profit | currency:financial.currency:'symbol':'1.0-0' }}</td>
+              <tr *ngFor="let financial of data.financials.financialData">
+                <td>{{ financial.year }}</td>
+                <td>{{ financial.revenue | currency:financial.currency:'symbol':'1.0-0' }}</td>
+                <td>{{ financial.profit | currency:financial.currency:'symbol':'1.0-0' }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div *ngIf="data.financials?.fundingRounds?.length">
-          <h5 class="font-semibold mt-4 mb-2">Funding Rounds:</h5>
-          <ul class="list-none space-y-2">
-            <li *ngFor="let round of data.financials.fundingRounds" class="p-3 bg-blue-50 rounded-md">
-              <span class="font-semibold">{{ round.roundType }} ({{ round.date | date:'mediumDate' }})</span>:
-              {{ round.amount | currency:'USD':'symbol':'1.0-0' }}
-              <span *ngIf="round.valuation"> (Valuation: {{ round.valuation | currency:'USD':'symbol':'1.0-0' }})</span>
-              <!-- Use optional chaining for investors.join -->
-              <div *ngIf="round.investors?.length" class="text-sm text-gray-600 mt-1">
-                Investors: {{ round.investors.join(', ') }}
+        <div *ngIf="data.financials?.fundingRounds?.length" class="mt-4">
+          <h4 class="font-semibold text-lg mb-3">Funding History</h4>
+          <div class="space-y-3">
+            <div *ngFor="let round of data.financials.fundingRounds" class="funding-round">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="font-semibold">{{ round.roundType }}</span>
+                  <span class="text-sm text-gray-600 ml-2">({{ round.date | date:'mediumDate' }})</span>
+                </div>
+                <div class="text-right">
+                  <div class="font-semibold text-blue-800">
+                    {{ round.amount | currency:'USD':'symbol':'1.0-0' }}
+                  </div>
+                  <div *ngIf="round.valuation" class="text-sm text-gray-600">
+                    Valuation: {{ round.valuation | currency:'USD':'symbol':'1.0-0' }}
+                  </div>
+                </div>
               </div>
-            </li>
-          </ul>
+              <div *ngIf="round.investors?.length" class="mt-2 text-sm text-gray-700">
+                <span class="font-medium">Investors:</span> {{ round.investors.join(', ') }}
+              </div>
+            </div>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
@@ -190,13 +238,17 @@
       </mat-card-header>
       <mat-card-content>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div *ngFor="let person of data.relationships.keyPeople" class="p-3 bg-gray-50 rounded-md flex items-center shadow-sm">
-            <mat-icon class="mr-2 text-xl" color="accent">account_circle</mat-icon>
-            <div>
-              <div class="font-semibold text-gray-800">{{ person.name }}</div>
-              <div class="text-sm text-gray-600">{{ person.title }}</div>
-              <!-- Use optional chaining for linkedinUrl -->
-              <a *ngIf="person.linkedinUrl" [href]="person.linkedinUrl" target="_blank" class="text-blue-600 text-xs hover:underline">LinkedIn</a>
+          <div *ngFor="let person of data.relationships.keyPeople" class="key-person-card">
+            <mat-icon class="text-blue-600">account_circle</mat-icon>
+            <div class="person-info">
+              <div class="name">{{ person.name }}</div>
+              <div class="title">{{ person.title }}</div>
+              <a *ngIf="person.linkedinUrl" 
+                 [href]="person.linkedinUrl" 
+                 target="_blank" 
+                 class="text-sm text-blue-600 hover:underline mt-1 inline-block">
+                <mat-icon class="text-sm align-text-bottom">launch</mat-icon> LinkedIn
+              </a>
             </div>
           </div>
         </div>
@@ -332,13 +384,12 @@
 
 <mat-dialog-actions align="end" class="dialog-actions-footer">
   <button mat-flat-button color="primary" (click)="scrollToTop()" *ngIf="isContentScrollable()">
-    <mat-icon>arrow_upward</mat-icon> Top
+    <mat-icon>arrow_upward</mat-icon> Back to Top
   </button>
   <button mat-flat-button color="warn" (click)="dialogRef.close()">
     <mat-icon>close</mat-icon> Close
   </button>
-  <!-- Use optional chaining for _id when constructing routerLink -->
-  <a mat-flat-button color="accent" [routerLink]="['/company/edit', data?._id]" (click)="dialogRef.close()" *ngIf="data?._id">
+  <button mat-flat-button color="accent" (click)="onEditClick()" *ngIf="data?._id">
     <mat-icon>edit</mat-icon> Edit Profile
-  </a>
+  </button>
 </mat-dialog-actions>

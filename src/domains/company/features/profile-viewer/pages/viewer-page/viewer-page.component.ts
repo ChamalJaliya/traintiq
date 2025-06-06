@@ -6,15 +6,14 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 // Update service and model imports
 import { CompanyProfileService } from '../../../../data/company-profile.service';
-
 import { CompanyProfile } from '../../../../../../shared/models/company-profile.model';
 
 @Component({
-  selector: 'app-viewer-page', // Selector name
+  selector: 'app-viewer-page',
   templateUrl: './viewer-page.component.html',
   styleUrls: ['./viewer-page.component.scss'],
   standalone: true,
@@ -36,6 +35,7 @@ export class ViewerPageComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private companyProfileService: CompanyProfileService,
     private snackBar: MatSnackBar
   ) { }
@@ -45,26 +45,37 @@ export class ViewerPageComponent implements OnInit {
     if (this.profileId) {
       this.companyProfileService.getProfile(this.profileId).subscribe({
         next: (profile) => {
-          this.companyProfile = profile;
-          this.isLoading = false;
+          if (profile) {
+            this.companyProfile = profile;
+            this.isLoading = false;
+          } else {
+            this.handleError('Profile not found');
+          }
         },
         error: (err) => {
-          console.error('Failed to load profile:', err);
-          this.snackBar.open('Failed to load profile details.', 'Close', { duration: 3000, panelClass: ['snackbar-error'] });
-          this.isLoading = false;
+          this.handleError('Failed to load profile details');
         }
       });
     } else {
-      this.isLoading = false;
-      this.snackBar.open('No profile ID provided.', 'Close', { duration: 3000, panelClass: ['snackbar-warn'] });
+      this.handleError('No profile ID provided');
     }
+  }
+
+  private handleError(message: string): void {
+    console.error(message);
+    this.snackBar.open(message, 'Close', { 
+      duration: 3000, 
+      panelClass: ['snackbar-error'] 
+    });
+    this.isLoading = false;
+    this.router.navigate(['/company/history']);
   }
 
   // Helper for social media icons
   getSocialIcon(platform: string): string {
     switch (platform.toLowerCase()) {
-      case 'linkedin': return 'linkedin'; // Replace with a custom icon if needed, or generic
-      case 'twitter': return 'public'; // Using generic 'public' for twitter/X
+      case 'linkedin': return 'linkedin';
+      case 'twitter': return 'public';
       case 'facebook': return 'facebook';
       case 'instagram': return 'photo_camera';
       case 'youtube': return 'subscriptions';
