@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { employeeRoutes } from '../domains/employee/employee.routes';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,31 @@ export const routes: Routes = [
           {
             path: '',
             redirectTo: 'generator',
+            pathMatch: 'full'
+          }
+        ]
+      },
+      {
+        path: 'employee',
+        children: [
+          {
+            path: 'analyzer',
+            loadComponent: () => import('../domains/employee/features/cv-analyzer/pages/analyzer-page/analyzer-page.component')
+              .then(m => m.AnalyzerPageComponent)
+          },
+          {
+            path: 'profiles',
+            loadComponent: () => import('../domains/employee/features/profile-viewer/pages/viewer-page/viewer-page.component')
+              .then(m => m.ViewerPageComponent)
+          },
+          {
+            path: 'talent-pool',
+            loadComponent: () => import('../domains/employee/features/talent-pool/pages/pool-page/pool-page.component')
+              .then(m => m.PoolPageComponent)
+          },
+          {
+            path: '',
+            redirectTo: 'analyzer',
             pathMatch: 'full'
           }
         ]
