@@ -1,49 +1,84 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4 sm:p-6 md:p-8">
-  <mat-card class="w-full max-w-4xl shadow-xl rounded-2xl border border-gray-200 p-6">
-    <mat-card-header class="mb-6">
-      <mat-card-title class="text-3xl font-bold text-gray-800 text-center w-full">Generate Traintiq Company Profile</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="p-4">
-      <!-- Input field for Company Website URL -->
-      <mat-form-field appearance="outline" class="w-full mb-6">
-        <mat-label>Company Website URL</mat-label>
-        <input matInput [(ngModel)]="companyUrl" placeholder="e.g., https://www.example.com" [disabled]="isLoading">
-        <mat-icon matSuffix>public</mat-icon>
-        <mat-hint>Enter the full URL of the company's official website.</mat-hint>
-        <mat-error *ngIf="!companyUrl.trim() && !isLoading">URL is required</mat-error>
+<!-- Generator Page Content -->
+<div class="page-container">
+  <div class="generator-card">
+    <div class="card-header">
+      <h1 class="title">Traintiq</h1>
+      <p class="subtitle">Profile Generator</p>
+    </div>
+
+    <div class="form-content">
+      <!-- Company URL Input -->
+      <mat-form-field appearance="outline">
+        <mat-label>Company Website URL*</mat-label>
+        <input matInput 
+               [(ngModel)]="companyUrl" 
+               placeholder="e.g., https://www.example.com" 
+               [disabled]="isLoading"
+               #urlInput="ngModel"
+               required
+               pattern="^https?://.*">
+        <mat-icon matPrefix>language</mat-icon>
+        <button *ngIf="companyUrl" 
+                matSuffix 
+                mat-icon-button 
+                aria-label="Clear" 
+                (click)="companyUrl=''"
+                [disabled]="isLoading">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-hint>Enter the full URL of the company's official website</mat-hint>
+        <mat-error *ngIf="urlInput.errors?.['required']">URL is required</mat-error>
+        <mat-error *ngIf="urlInput.errors?.['pattern']">Please enter a valid URL starting with http:// or https://</mat-error>
       </mat-form-field>
 
-      <!-- Textarea for Custom Instructions -->
-      <mat-form-field appearance="outline" class="w-full mb-8">
-        <mat-label>Custom Instructions (Optional)</mat-label>
-        <textarea matInput [(ngModel)]="customInstructions" rows="5" placeholder="e.g., 'Focus on their sustainability efforts and company culture, and mention key partnerships.'" [disabled]="isLoading"></textarea>
-        <mat-hint>Provide specific instructions for the AI to tailor the profile generation.</mat-hint>
+      <!-- Custom Instructions -->
+      <mat-form-field appearance="outline">
+        <mat-label>Custom Instructions</mat-label>
+        <textarea matInput
+                  [(ngModel)]="customInstructions"
+                  rows="4"
+                  placeholder="Add specific instructions to customize the profile generation..."
+                  [disabled]="isLoading"></textarea>
+        <mat-icon matPrefix>edit_note</mat-icon>
+        <mat-hint>
+          <mat-icon class="hint-icon">info</mat-icon>
+          Optional: Provide specific details you'd like to focus on
+        </mat-hint>
       </mat-form-field>
 
-      <!-- Buttons to trigger profile generation and reset -->
-      <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-        <button mat-flat-button color="primary" (click)="generateProfile()" [disabled]="isLoading || !companyUrl.trim()"
-                class="w-full sm:w-auto px-8 py-3 text-xl font-bold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300">
-          <mat-icon>auto_awesome</mat-icon> Generate Profile
+      <!-- Button Container -->
+      <div class="button-container">
+        <button mat-flat-button
+                class="generate-btn"
+                (click)="generateProfile()"
+                [disabled]="isLoading || !companyUrl.trim() || urlInput.invalid">
+          <mat-icon>auto_awesome</mat-icon>
+          Generate Profile
         </button>
 
-        <button mat-stroked-button color="accent" (click)="resetForm()" [disabled]="isLoading"
-                class="w-full sm:w-auto px-8 py-3 text-xl font-bold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300">
-          <mat-icon>refresh</mat-icon> Reset Form
+        <button mat-stroked-button
+                class="reset-btn"
+                (click)="resetForm()"
+                [disabled]="isLoading">
+          <mat-icon>refresh</mat-icon>
+          Reset
         </button>
       </div>
 
-      <!-- Loading indicator with Angular Material ProgressBar -->
-      <div *ngIf="isLoading" class="mt-8 text-center animate-pulse">
-        <mat-progress-bar mode="indeterminate" class="rounded-full h-3"></mat-progress-bar>
-        <p class="mt-4 text-blue-700 text-lg font-medium">AI is working its magic... Please wait.</p>
+      <!-- Loading Container -->
+      <div class="loading-container" *ngIf="isLoading">
+        <div class="progress-bar">
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
+        <div class="loading-text">
+          Generating Profile
+          <span class="dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </span>
+        </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
 </div>
-
-<style>
-  .snackbar-error { background-color: #f44336 !important; color: white !important; }
-  .snackbar-success { background-color: #4CAF50 !important; color: white !important; }
-  .snackbar-warn { background-color: #ff9800 !important; color: white !important; }
-</style>

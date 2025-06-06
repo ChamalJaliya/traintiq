@@ -1,0 +1,132 @@
+// Container styles
+.app-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f8f9fa;
+}
+
+// Sidenav styles
+.app-sidenav {
+  width: 250px;
+  background: #1a237e;
+  border: none;
+
+  .sidenav-header {
+    height: 64px;
+    background: #151b60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .logo-container {
+      width: 100%;
+      height: 40px;
+      
+      .logo-svg {
+        width: 100%;
+        height: 100%;
+        
+        .logo-text {
+          fill: white;
+          font-size: 24px;
+          font-weight: 600;
+          font-family: 'Segoe UI', sans-serif;
+        }
+      }
+    }
+  }
+
+  .mat-nav-list {
+    padding: 8px 0;
+
+    a.mat-list-item {
+      height: 48px;
+      margin: 4px 8px;
+      border-radius: 4px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 400;
+      letter-spacing: 0.15px;
+      transition: all 0.3s ease;
+
+      .mat-icon {
+        margin-right: 16px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      span {
+        font-size: 14px;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+
+        .mat-icon {
+          color: white;
+        }
+      }
+
+      &.active {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-weight: 500;
+
+        .mat-icon {
+          color: white;
+        }
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: #64b5f6;
+          border-radius: 0 4px 4px 0;
+          box-shadow: 0 0 8px rgba(100, 181, 246, 0.5);
+        }
+      }
+    }
+  }
+}
+
+// Toolbar styles
+.app-toolbar {
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  height: 64px;
+
+  .toolbar-logo {
+    margin-left: 16px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #1a237e;
+  }
+
+  .flex-spacer {
+    flex: 1;
+  }
+
+  .toolbar-action {
+    margin-left: 8px;
+    color: rgba(0, 0, 0, 0.54);
+
+    &:hover {
+      color: #1a237e;
+    }
+  }
+}
+
+// Main content styles
+.main-content {
+  padding: 24px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: linear-gradient(135deg, #f6f8ff 0%, #f0f4ff 100%);
+} 

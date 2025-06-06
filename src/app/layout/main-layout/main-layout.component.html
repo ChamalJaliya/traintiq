@@ -1,0 +1,45 @@
+<mat-drawer-container class="app-container">
+  <mat-drawer #drawer mode="side" class="app-sidenav" opened>
+    <div class="sidenav-header">
+      <div class="logo-container">
+        <svg class="logo-svg" viewBox="0 0 100 40">
+          <text x="10" y="30" class="logo-text">Traintiq</text>
+        </svg>
+      </div>
+    </div>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/company/generator" routerLinkActive="active">
+        <mat-icon>auto_awesome</mat-icon>
+        <span>Profile Generator</span>
+      </a>
+      <a mat-list-item routerLink="/company/history" routerLinkActive="active">
+        <mat-icon>history</mat-icon>
+        <span>Generation History</span>
+      </a>
+      <a mat-list-item routerLink="/company/settings" routerLinkActive="active">
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </a>
+    </mat-nav-list>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <mat-toolbar class="app-toolbar">
+      <button mat-icon-button (click)="drawer.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="toolbar-logo">Traintiq</span>
+      <span class="flex-spacer"></span>
+      <button mat-icon-button class="toolbar-action" matTooltip="Notifications">
+        <mat-icon>notifications</mat-icon>
+      </button>
+      <button mat-icon-button class="toolbar-action" matTooltip="Profile">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container> 

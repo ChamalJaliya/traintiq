@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDividerModule } from '@angular/material/divider';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { CompanyProfile } from '../../../../../../shared/models/company-profile.model';
@@ -48,6 +48,7 @@ export class EditorPageComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private companyProfileService: CompanyProfileService,
     private snackBar: MatSnackBar
   ) { }
@@ -57,19 +58,30 @@ export class EditorPageComponent implements OnInit {
     if (this.profileId) {
       this.companyProfileService.getProfile(this.profileId).subscribe({
         next: (profile) => {
-          this.companyProfile = this.initializeProfile(profile);
-          this.isLoading = false;
+          if (profile) {
+            this.companyProfile = this.initializeProfile(profile);
+            this.isLoading = false;
+          } else {
+            this.handleError('Profile not found');
+          }
         },
         error: (err) => {
-          console.error('Failed to load profile for editing:', err);
-          this.snackBar.open('Could not load profile for editing.', 'Close', { duration: 3000, panelClass: ['snackbar-error'] });
-          this.isLoading = false;
+          this.handleError('Failed to load profile for editing');
         }
       });
     } else {
-      this.isLoading = false;
-      this.snackBar.open('No profile ID provided for editing.', 'Close', { duration: 3000, panelClass: ['snackbar-warn'] });
+      this.handleError('No profile ID provided for editing');
     }
+  }
+
+  private handleError(message: string): void {
+    console.error(message);
+    this.snackBar.open(message, 'Close', { 
+      duration: 3000, 
+      panelClass: ['snackbar-error'] 
+    });
+    this.isLoading = false;
+    this.router.navigate(['/company/history']);
   }
 
   private initializeProfile(profile: CompanyProfile): CompanyProfile {
