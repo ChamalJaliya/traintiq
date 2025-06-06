@@ -32,6 +32,24 @@ import { MatDividerModule } from '@angular/material/divider';
           </div>
         </div>
         <mat-nav-list>
+          <!-- Question Grading Section -->
+          <div class="nav-section">
+            <div class="nav-section-header">
+              <mat-icon>school</mat-icon>
+              <span>Question Grading</span>
+            </div>
+            <a mat-list-item routerLink="/question-grading/create" routerLinkActive="active" class="nav-item">
+              <mat-icon>add_circle</mat-icon>
+              <span>Create Questions</span>
+            </a>
+            <a mat-list-item routerLink="/question-grading/answer" routerLinkActive="active" class="nav-item">
+              <mat-icon>question_answer</mat-icon>
+              <span>Answer Questions</span>
+            </a>
+          </div>
+
+          <mat-divider class="nav-divider"></mat-divider>
+
           <!-- Company Section -->
           <div class="nav-section">
             <div class="nav-section-header">

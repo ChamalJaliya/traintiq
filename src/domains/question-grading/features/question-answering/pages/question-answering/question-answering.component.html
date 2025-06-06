@@ -1,0 +1,78 @@
+<div class="question-answering-container">
+    <mat-card class="question-card" *ngIf="currentQuestion">
+        <mat-card-header>
+            <mat-card-title>Answer the Question</mat-card-title>
+            <div class="timer" [ngClass]="{'warning': timeLeft <= 30}">
+                <mat-icon>timer</mat-icon>
+                <span>{{timeLeft | number:'2.0'}}s</span>
+            </div>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="question-section">
+                <div class="category" *ngIf="currentQuestion.category">
+                    <mat-icon>{{getCategoryIcon(currentQuestion.category)}}</mat-icon>
+                    <span>{{currentQuestion.category}}</span>
+                </div>
+                <p class="question-text">{{currentQuestion.text}}</p>
+            </div>
+
+            <form [formGroup]="answerForm" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Your Answer</mat-label>
+                    <textarea matInput formControlName="answer" rows="3" 
+                             placeholder="Type your answer here..."
+                             [disabled]="loading || isTimeUp"></textarea>
+                    <mat-error *ngIf="answerForm.get('answer')?.hasError('required')">
+                        Answer is required
+                    </mat-error>
+                    <mat-error *ngIf="answerForm.get('answer')?.hasError('minlength')">
+                        Answer must be at least 2 characters long
+                    </mat-error>
+                </mat-form-field>
+
+                <div class="actions">
+                    <button mat-raised-button color="primary" type="submit" 
+                            [disabled]="!answerForm.valid || loading || isTimeUp">
+                        <mat-icon>send</mat-icon>
+                        Submit Answer
+                    </button>
+                    <button mat-stroked-button type="button" (click)="loadRandomQuestion()"
+                            [disabled]="loading">
+                        <mat-icon>skip_next</mat-icon>
+                        Next Question
+                    </button>
+                </div>
+            </form>
+
+            <mat-card class="result-card" *ngIf="lastSubmission">
+                <mat-card-content>
+                    <div class="score-section">
+                        <div class="score" [style.color]="getScoreColor(lastSubmission.similarityScore)">
+                            {{lastSubmission.similarityScore}}%
+                        </div>
+                        <div class="score-label">Similarity Score</div>
+                    </div>
+                    <div class="correct-answer">
+                        <div class="label">Correct Answer:</div>
+                        <div class="text">{{currentQuestion.correctAnswer}}</div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </mat-card-content>
+    </mat-card>
+
+    <div class="loading-container" *ngIf="loading">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Loading question...</p>
+    </div>
+
+    <div class="time-up-overlay" *ngIf="isTimeUp && !lastSubmission">
+        <mat-icon>alarm_off</mat-icon>
+        <h2>Time's Up!</h2>
+        <p>You ran out of time. Try the next question!</p>
+        <button mat-raised-button color="primary" (click)="loadRandomQuestion()">
+            <mat-icon>refresh</mat-icon>
+            Try Another Question
+        </button>
+    </div>
+</div> 
