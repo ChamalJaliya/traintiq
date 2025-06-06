@@ -1,0 +1,14 @@
+// Add any component-specific styles here
+.history-list {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.history-item {
+  margin-bottom: 1rem;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+} 

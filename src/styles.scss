@@ -1,1 +1,22 @@
-/* You can add global styles to this file, and also import other style files */
+/* Angular Material theme is typically imported via angular.json "styles" array.
+   The `ng add @angular/material` command handles this.
+   If for some reason you needed to manually import a theme into SCSS, it would look like this:
+   @use '@angular/material' as mat;
+   @include mat.all-component-themes($your-theme-variable);
+   (But for prebuilt themes, angular.json setup is preferred, no manual `@use`/`@include` needed here).
+*/
+
+/* Inter Font Import - for modern UI aesthetics */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Apply Inter font globally and ensure Material typography aligns */
+html, body {
+  font-family: 'Inter', sans-serif;
+  height: 100%; /* Important for full height layouts */
+  margin: 0;   /* Remove default body margin */
+}
+
+/* Apply Material typography to body if you didn't choose global setup */
+.mat-typography {
+  font-family: 'Inter', sans-serif;
+}

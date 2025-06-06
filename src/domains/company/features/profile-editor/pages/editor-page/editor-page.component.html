@@ -1,0 +1,140 @@
+<div class="min-h-screen flex flex-col items-center p-8 bg-gray-100">
+  <mat-card class="w-full max-w-5xl shadow-xl rounded-2xl border border-gray-200 p-6">
+    <mat-card-header class="mb-6">
+      <mat-card-title class="text-3xl font-bold text-gray-800 text-center w-full">Edit Company Profile</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="p-4">
+      <div *ngIf="isLoading" class="text-center p-8">
+        <mat-progress-bar mode="indeterminate" class="h-2 mb-4"></mat-progress-bar>
+        <p class="text-blue-600">Loading profile for editing...</p>
+      </div>
+
+      <div *ngIf="!isLoading && companyProfile">
+        <!-- Basic Info -->
+        <mat-divider class="my-6">
+          <span class="text-lg font-bold text-gray-700">Basic Information</span>
+        </mat-divider>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <mat-form-field appearance="outline">
+            <mat-label>Legal Name</mat-label>
+            <input matInput [(ngModel)]="companyProfile.basicInfo!.legalName">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Trading Name</mat-label>
+            <input matInput [(ngModel)]="companyProfile.basicInfo!.tradingName">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>DBA</mat-label>
+            <input matInput [(ngModel)]="companyProfile.basicInfo!.dba">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Logo URL</mat-label>
+            <input matInput [(ngModel)]="companyProfile.basicInfo!.logoUrl">
+          </mat-form-field>
+        </div>
+
+        <!-- Descriptive Info -->
+        <mat-divider class="my-6">
+          <span class="text-lg font-bold text-gray-700">Descriptive Information</span>
+        </mat-divider>
+        <div class="mb-6">
+          <mat-form-field appearance="outline" class="w-full mb-4">
+            <mat-label>Tagline</mat-label>
+            <textarea matInput [(ngModel)]="companyProfile.descriptive!.tagline" rows="2"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full mb-4">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="companyProfile.descriptive!.description" rows="5"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Mission</mat-label>
+            <textarea matInput [(ngModel)]="companyProfile.descriptive!.mission" rows="2"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Vision</mat-label>
+            <textarea matInput [(ngModel)]="companyProfile.descriptive!.vision" rows="2"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Core Values (comma separated)</mat-label>
+            <input matInput
+                   [ngModel]="companyProfile.descriptive?.coreValues?.join(', ') || ''"
+                   (input)="updateCoreValues($event)">
+          </mat-form-field>
+        </div>
+
+        <!-- Key Milestones -->
+        <mat-divider class="my-6">
+          <span class="text-lg font-bold text-gray-700">Financial Data / Milestones (Simplified)</span>
+        </mat-divider>
+        <div class="mb-6 space-y-4">
+          <div *ngFor="let financialData of companyProfile.financials?.financialData || []; let i = index" class="flex flex-col sm:flex-row items-center gap-4 p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
+            <mat-form-field appearance="outline" class="w-full sm:w-1/4">
+              <mat-label>Year</mat-label>
+              <input matInput type="number" [(ngModel)]="financialData.year">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full sm:w-2/3">
+              <mat-label>Revenue (USD)</mat-label>
+              <input matInput type="number" [(ngModel)]="financialData.revenue">
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="removeFinancialData(i)" matTooltip="Remove Financial Data">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <div class="flex justify-center mt-4">
+            <button mat-stroked-button color="accent" (click)="addFinancialData()">
+              <mat-icon>add</mat-icon> Add Financial Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Sections -->
+        <mat-divider class="my-6">
+          <span class="text-lg font-bold text-gray-700">Custom Sections</span>
+        </mat-divider>
+        <div class="mb-6 space-y-4">
+          <div *ngIf="companyProfile?.customSections">
+            <div *ngFor="let entry of getCustomSections()" class="p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
+              <div class="flex justify-between items-center mb-2">
+                <mat-form-field appearance="outline" class="w-full mr-4">
+                  <mat-label>Section Title</mat-label>
+                  <input matInput [ngModel]="entry.key" (ngModelChange)="updateCustomSectionKey(entry.key, $event)">
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeCustomSection(entry.key)" matTooltip="Remove Section">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Content</mat-label>
+                <textarea matInput [(ngModel)]="companyProfile.customSections[entry.key]" rows="5"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="flex justify-center mt-4">
+            <button mat-stroked-button color="accent" (click)="addCustomSection()">
+              <mat-icon>add</mat-icon> Add Custom Section
+            </button>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-4 mt-8">
+          <button mat-flat-button color="primary" (click)="saveProfile()" [disabled]="isSaving">
+            <mat-icon>save</mat-icon> {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button mat-stroked-button color="accent" routerLink="/company/generator">
+            <mat-icon>cancel</mat-icon> Cancel
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && !companyProfile" class="text-center p-8 text-gray-600">
+        <p class="text-xl">Profile not found or an error occurred.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+<style>
+  .snackbar-error { background-color: #f44336 !important; color: white !important; }
+  .snackbar-success { background-color: #4CAF50 !important; color: white !important; }
+  .snackbar-warn { background-color: #ff9800 !important; color: white !important; }
+  .snackbar-info { background-color: #2196F3 !important; color: white !important; }
+</style>

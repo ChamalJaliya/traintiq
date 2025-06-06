@@ -1,0 +1,10 @@
+// Add any component-specific styles here
+.section-card {
+  margin-bottom: 1.5rem;
+}
+
+:host ::ng-deep {
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+} 

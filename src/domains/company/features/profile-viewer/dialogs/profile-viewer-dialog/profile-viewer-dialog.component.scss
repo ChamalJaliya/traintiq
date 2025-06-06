@@ -1,0 +1,115 @@
+:host {
+  display: block;
+}
+
+/* Style for the dialog title */
+.dialog-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a237e; /* Darker blue text */
+
+  img {
+    border: 1px solid #bbdefb;
+  }
+}
+
+/* Style for the scrollable content area */
+.dialog-content-scrollable {
+  padding: 24px;
+  max-height: 80vh; /* Limits height, enables scrolling */
+  overflow-y: auto; /* Enables vertical scrollbar when content overflows */
+
+  /* Customize scrollbar for a nicer look */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #90CAF9; /* Light blue thumb */
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #64B5F6; /* Slightly darker blue on hover */
+  }
+}
+
+/* Styling for individual content sections (using mat-card) */
+.section-card {
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .mat-card-header {
+    padding: 16px 20px 0; /* Adjust padding */
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    color: #374151;
+
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  mat-card-content {
+    padding: 20px; /* Consistent padding within content */
+    font-size: 0.95rem; /* Slightly smaller base text for detail */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+
+      th, td {
+        padding: 10px;
+        border: 1px solid #e0e0e0;
+      }
+      th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+        color: #555;
+      }
+    }
+
+    ul.list-disc, ul.list-decimal, ul.list-circle {
+      margin-top: 8px;
+      margin-bottom: 8px;
+      padding-left: 25px; /* Deeper indent for lists */
+    }
+    li {
+      margin-bottom: 5px;
+      color: #424242;
+    }
+  }
+}
+
+/* Styling for the dialog actions footer */
+.dialog-actions-footer {
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  background-color: #e3f2fd; /* Match title background */
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 0.5rem; /* Space between buttons */
+}
+
+// Override default Angular Material dialog panel styling for rounded corners
+.mat-dialog-container {
+  border-radius: 15px !important; // More pronounced rounded corners
+  overflow: hidden; // Ensures content respects border-radius
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important; // Deeper shadow for the dialog
+}
