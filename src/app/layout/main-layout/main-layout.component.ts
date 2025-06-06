@@ -7,6 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-main-layout',
@@ -19,7 +20,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatListModule,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDividerModule
   ],
   template: `
     <mat-drawer-container class="app-container">
@@ -30,18 +32,46 @@ import { MatTooltipModule } from '@angular/material/tooltip';
           </div>
         </div>
         <mat-nav-list>
-          <a mat-list-item routerLink="/company/generator" routerLinkActive="active" class="nav-item">
-            <mat-icon>auto_awesome</mat-icon>
-            <span>Profile Generator</span>
-          </a>
-          <a mat-list-item routerLink="/company/history" routerLinkActive="active" class="nav-item">
-            <mat-icon>history</mat-icon>
-            <span>Generation History</span>
-          </a>
-          <a mat-list-item routerLink="/company/settings" routerLinkActive="active" class="nav-item">
-            <mat-icon>settings</mat-icon>
-            <span>Settings</span>
-          </a>
+          <!-- Company Section -->
+          <div class="nav-section">
+            <div class="nav-section-header">
+              <mat-icon>business</mat-icon>
+              <span>Company</span>
+            </div>
+            <a mat-list-item routerLink="/company/generator" routerLinkActive="active" class="nav-item">
+              <mat-icon>auto_awesome</mat-icon>
+              <span>Profile Generator</span>
+            </a>
+            <a mat-list-item routerLink="/company/history" routerLinkActive="active" class="nav-item">
+              <mat-icon>history</mat-icon>
+              <span>Generation History</span>
+            </a>
+            <a mat-list-item routerLink="/company/settings" routerLinkActive="active" class="nav-item">
+              <mat-icon>settings</mat-icon>
+              <span>Settings</span>
+            </a>
+          </div>
+
+          <!-- Employee Section -->
+          <mat-divider class="nav-divider"></mat-divider>
+          <div class="nav-section">
+            <div class="nav-section-header">
+              <mat-icon>groups</mat-icon>
+              <span>Employee</span>
+            </div>
+            <a mat-list-item routerLink="/employee/analyzer" routerLinkActive="active" class="nav-item">
+              <mat-icon>psychology</mat-icon>
+              <span>CV Analyzer</span>
+            </a>
+            <a mat-list-item routerLink="/employee/profiles" routerLinkActive="active" class="nav-item">
+              <mat-icon>badge</mat-icon>
+              <span>Employee Profiles</span>
+            </a>
+            <a mat-list-item routerLink="/employee/talent-pool" routerLinkActive="active" class="nav-item">
+              <mat-icon>group_work</mat-icon>
+              <span>Talent Pool</span>
+            </a>
+          </div>
         </mat-nav-list>
       </mat-drawer>
 
@@ -334,6 +364,34 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       height: calc(100vh - 64px);
       overflow-y: auto;
       background: linear-gradient(135deg, #f6f8ff 0%, #f0f4ff 100%);
+    }
+
+    .nav-section {
+      margin: 8px 0;
+
+      .nav-section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 24px 8px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          opacity: 0.9;
+        }
+      }
+    }
+
+    .nav-divider {
+      margin: 16px 0;
+      border-color: rgba(255, 255, 255, 0.1);
     }
   `]
 })

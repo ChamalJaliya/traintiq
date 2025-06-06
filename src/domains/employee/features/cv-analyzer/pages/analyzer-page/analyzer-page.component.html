@@ -1,0 +1,168 @@
+<div class="analyzer-page">
+  <!-- Header -->
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">CV Analyzer</h1>
+    <p class="text-xl text-gray-600">Upload a CV to analyze skills and generate a profile</p>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Upload Section -->
+      <div class="bg-white rounded-xl shadow-lg">
+        <div class="p-8">
+          <!-- Upload Area -->
+          <div class="upload-section border-2 border-dashed rounded-xl text-center"
+               [class.drag-over]="isDragging"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)">
+            
+            <div class="upload-icon-container">
+              <mat-icon>cloud_upload</mat-icon>
+            </div>
+            
+            <h3 class="text-xl font-semibold mb-3">Drag and drop your CV here</h3>
+            <p class="text-gray-500 mb-6">Supported formats: PDF, DOC, DOCX</p>
+            
+            <div class="file-input-wrapper">
+              <button mat-raised-button 
+                      color="primary" 
+                      class="upload-button"
+                      (click)="triggerFileInput()">
+                <mat-icon class="mr-2">attach_file</mat-icon>
+                Choose File
+              </button>
+
+              <input #fileInput 
+                     type="file" 
+                     class="file-input" 
+                     accept=".pdf,.doc,.docx"
+                     (change)="onFileSelected($event)">
+            </div>
+          </div>
+
+          <!-- Selected File Display -->
+          <div *ngIf="selectedFile" class="mt-6">
+            <div class="bg-blue-50 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center min-w-0">
+                  <div class="flex-shrink-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                    <mat-icon class="text-blue-600">description</mat-icon>
+                  </div>
+                  <div class="ml-3 min-w-0 flex-1">
+                    <p class="text-sm font-medium text-blue-900 truncate">{{ selectedFile.name }}</p>
+                    <p class="text-xs text-blue-700">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</p>
+                  </div>
+                  <button mat-icon-button 
+                          class="flex-shrink-0"
+                          (click)="removeFile()">
+                    <mat-icon class="text-blue-700 hover:text-red-500 transition-colors">close</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analysis Progress -->
+          <div *ngIf="isAnalyzing" class="mt-6">
+            <div class="text-center mb-4">
+              <div class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-full">
+                <mat-icon class="mr-2 animate-spin">autorenew</mat-icon>
+                Analyzing CV...
+              </div>
+            </div>
+            <mat-progress-bar mode="indeterminate" class="rounded-full"></mat-progress-bar>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Results -->
+      <div class="bg-white rounded-xl shadow-lg">
+        <!-- Empty State -->
+        <div *ngIf="!analysisResults" class="flex items-center justify-center p-8" style="min-height: 400px;">
+          <div class="text-center">
+            <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+              <mat-icon class="text-5xl">description</mat-icon>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No CV analyzed yet</h3>
+            <p class="text-sm text-gray-500">Upload a CV to see the analysis results here</p>
+          </div>
+        </div>
+
+        <!-- Results Content -->
+        <div *ngIf="analysisResults" class="p-8">
+          <h2 class="text-2xl font-bold mb-6">Analysis Results</h2>
+          
+          <!-- Confidence Score -->
+          <div class="confidence-score mb-8">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-lg font-medium">Match Confidence</span>
+              <span class="text-2xl font-bold text-blue-600">
+                {{ analysisResults.parsedData.confidence | percent }}
+              </span>
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="analysisResults.parsedData.confidence * 100"
+              class="rounded-full h-2">
+            </mat-progress-bar>
+          </div>
+
+          <mat-divider class="mb-8"></mat-divider>
+
+          <!-- Skills Section -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4">Detected Skills</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div *ngFor="let skill of analysisResults.parsedData.extractedSkills"
+                   class="skill-card p-4 rounded-lg border"
+                   [class.border-green-200]="skill.confidence >= 0.8"
+                   [class.border-yellow-200]="skill.confidence >= 0.6 && skill.confidence < 0.8"
+                   [class.border-red-200]="skill.confidence < 0.6">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="font-medium">{{ skill.name }}</span>
+                  <mat-chip [class]="getConfidenceClass(skill.confidence)">
+                    {{ skill.confidence | percent }}
+                  </mat-chip>
+                </div>
+                <div class="text-sm text-gray-600">{{ skill.category | titlecase }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Highlights -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4">Key Highlights</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <ul class="space-y-3">
+                <li *ngFor="let highlight of analysisResults.parsedData.keyHighlights" 
+                    class="flex items-start">
+                  <mat-icon class="text-green-500 mr-3 text-lg">check_circle</mat-icon>
+                  <span class="text-gray-700">{{ highlight }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-wrap gap-4 justify-end">
+            <button mat-stroked-button 
+                    color="primary" 
+                    class="action-button"
+                    (click)="downloadAnalysis()">
+              <mat-icon>download</mat-icon>
+              Download Analysis
+            </button>
+            <button mat-raised-button 
+                    color="primary" 
+                    class="action-button"
+                    (click)="generateProfile()">
+              <mat-icon>person_add</mat-icon>
+              Generate Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

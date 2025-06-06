@@ -1,0 +1,86 @@
+<div class="min-h-screen bg-gray-100 p-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Talent Pool</h1>
+      <p class="text-gray-600 mt-2">Browse and manage employee profiles</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="bg-white rounded-lg shadow-sm p-8 text-center">
+      <mat-progress-bar mode="indeterminate" class="mb-4"></mat-progress-bar>
+      <p class="text-gray-600">Loading profiles...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="bg-white rounded-lg shadow-sm p-8 text-center">
+      <mat-icon class="text-red-500 text-6xl mb-4">error_outline</mat-icon>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">{{ error }}</h3>
+      <button mat-flat-button color="primary" (click)="retry()">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="!isLoading && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Profile Cards -->
+      <mat-card *ngFor="let profile of filteredProfiles$ | async" class="profile-card">
+        <mat-card-header>
+          <div mat-card-avatar class="profile-avatar">
+            <img [src]="profile.personalInfo?.profileImage || 'https://placehold.co/200x200/cccccc/ffffff?text=Profile'" 
+                 [alt]="profile.personalInfo?.firstName + ' ' + profile.personalInfo?.lastName">
+          </div>
+          <mat-card-title>{{ profile.personalInfo?.firstName }} {{ profile.personalInfo?.lastName }}</mat-card-title>
+          <mat-card-subtitle>{{ profile.experience[0]?.title || 'No title specified' }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- Location -->
+          <div *ngIf="profile.personalInfo?.location" class="mb-4 flex items-center text-gray-600">
+            <mat-icon class="mr-2">location_on</mat-icon>
+            {{ profile.personalInfo.location }}
+          </div>
+
+          <!-- Top Skills -->
+          <div class="mb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Top Skills</h4>
+            <div class="flex flex-wrap gap-2">
+              <mat-basic-chip *ngFor="let skill of getTopSkills(profile)"
+                       [color]="getSkillColor(skill.level)"
+                       [matTooltip]="getSkillLevelText(skill.level) + ' - ' + skill.yearsOfExperience + ' years'">
+                {{ skill.name }}
+              </mat-basic-chip>
+            </div>
+          </div>
+
+          <!-- Experience Summary -->
+          <div class="text-sm text-gray-600">
+            <p>{{ profile.experience[0]?.company || 'No company specified' }}</p>
+            <p *ngIf="profile.experience[0]?.startDate">
+              Since {{ profile.experience[0].startDate | date:'MMM yyyy' }}
+            </p>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-button color="primary" (click)="openProfileDialog(profile)">
+            <mat-icon>visibility</mat-icon>
+            View Profile
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Empty State -->
+      <div *ngIf="(filteredProfiles$ | async)?.length === 0" class="col-span-full bg-white rounded-lg shadow-sm p-8 text-center">
+        <mat-icon class="text-gray-400 text-6xl mb-4">people_outline</mat-icon>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Profiles Found</h3>
+        <p class="text-gray-600">Start by adding employee profiles to your talent pool.</p>
+        <button mat-flat-button color="primary" class="mt-4" routerLink="/employee/profiles/new">
+          <mat-icon>add</mat-icon>
+          Add Profile
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,280 @@
+<h2 mat-dialog-title class="dialog-title">
+  <div class="profile-info">
+    <div class="avatar-container">
+      <img [src]="data.personalInfo?.profileImage || 'https://placehold.co/200x200/cccccc/ffffff?text=Profile'" 
+           [alt]="data.personalInfo?.firstName + ' ' + data.personalInfo?.lastName">
+    </div>
+    <div class="profile-details">
+      <div class="profile-name">{{ data.personalInfo?.firstName }} {{ data.personalInfo?.lastName }}</div>
+      <div class="profile-title" *ngIf="data.experience[0]?.title">{{ data.experience[0].title }}</div>
+      <div class="profile-location" *ngIf="data.personalInfo?.location">
+        <mat-icon>location_on</mat-icon>
+        {{ data.personalInfo.location }}
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button class="dialog-close-button" (click)="dialogRef.close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content class="mat-typography dialog-content-scrollable">
+  <div class="content-wrapper">
+    <mat-tab-group>
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="p-4">
+          <!-- Contact Information -->
+          <mat-card class="section-card">
+            <mat-card-header>
+              <mat-card-title class="section-title">
+                <mat-icon color="primary">contact_mail</mat-icon>
+                Contact Information
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="info-item" *ngIf="data.personalInfo?.email">
+                  <mat-icon>email</mat-icon>
+                  <a [href]="'mailto:' + data.personalInfo.email">{{ data.personalInfo.email }}</a>
+                </div>
+                <div class="info-item" *ngIf="data.personalInfo?.phone">
+                  <mat-icon>phone</mat-icon>
+                  {{ data.personalInfo.phone }}
+                </div>
+                <div class="info-item" *ngIf="data.personalInfo?.linkedIn">
+                  <mat-icon>link</mat-icon>
+                  <a [href]="data.personalInfo.linkedIn" target="_blank">LinkedIn Profile</a>
+                </div>
+                <div class="info-item" *ngIf="data.personalInfo?.github">
+                  <mat-icon>code</mat-icon>
+                  <a [href]="data.personalInfo.github" target="_blank">GitHub Profile</a>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Skills -->
+          <mat-card class="section-card">
+            <mat-card-header>
+              <mat-card-title class="section-title">
+                <mat-icon color="primary">psychology</mat-icon>
+                Skills
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <!-- Technical Skills -->
+              <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Technical Skills</h3>
+                <div class="flex flex-wrap gap-2">
+                  <mat-chip *ngFor="let skill of data.skills.technical"
+                           [color]="getSkillColor(skill.level)"
+                           [matTooltip]="getSkillLevelText(skill.level) + ' - ' + skill.yearsOfExperience + ' years'">
+                    {{ skill.name }}
+                    <mat-progress-bar class="mt-1"
+                                    mode="determinate"
+                                    [value]="(skill.level / 5) * 100">
+                    </mat-progress-bar>
+                  </mat-chip>
+                </div>
+              </div>
+
+              <!-- Soft Skills -->
+              <div class="mb-6" *ngIf="data.skills.soft?.length">
+                <h3 class="text-lg font-semibold mb-3">Soft Skills</h3>
+                <div class="flex flex-wrap gap-2">
+                  <mat-chip *ngFor="let skill of data.skills.soft"
+                           [color]="getSkillColor(skill.level)"
+                           [matTooltip]="getSkillLevelText(skill.level) + ' - ' + skill.yearsOfExperience + ' years'">
+                    {{ skill.name }}
+                  </mat-chip>
+                </div>
+              </div>
+
+              <!-- Languages -->
+              <div *ngIf="data.skills.languages?.length">
+                <h3 class="text-lg font-semibold mb-3">Languages</h3>
+                <div class="flex flex-wrap gap-2">
+                  <mat-chip *ngFor="let lang of data.skills.languages"
+                           color="primary">
+                    {{ lang.name }} - {{ lang.level }}
+                  </mat-chip>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Experience Tab -->
+      <mat-tab label="Experience">
+        <div class="p-4">
+          <mat-card class="section-card" *ngFor="let exp of data.experience">
+            <mat-card-header>
+              <mat-card-title class="text-xl font-semibold">{{ exp.title }}</mat-card-title>
+              <mat-card-subtitle>
+                {{ exp.company }}
+                <span class="text-gray-500 ml-2">
+                  {{ exp.startDate | date:'MMM yyyy' }} - 
+                  {{ exp.current ? 'Present' : (exp.endDate | date:'MMM yyyy') }}
+                </span>
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="my-3">{{ exp.description }}</p>
+              
+              <!-- Highlights -->
+              <div *ngIf="exp.highlights?.length" class="mb-3">
+                <h4 class="font-semibold mb-2">Key Achievements</h4>
+                <ul class="list-disc list-inside">
+                  <li *ngFor="let highlight of exp.highlights">{{ highlight }}</li>
+                </ul>
+              </div>
+
+              <!-- Technologies -->
+              <div *ngIf="exp.technologies?.length" class="mb-3">
+                <h4 class="font-semibold mb-2">Technologies Used</h4>
+                <div class="flex flex-wrap gap-2">
+                  <mat-chip *ngFor="let tech of exp.technologies" color="accent">
+                    {{ tech }}
+                  </mat-chip>
+                </div>
+              </div>
+
+              <!-- Responsibilities -->
+              <div *ngIf="exp.responsibilities?.length">
+                <h4 class="font-semibold mb-2">Key Responsibilities</h4>
+                <ul class="list-disc list-inside">
+                  <li *ngFor="let responsibility of exp.responsibilities">{{ responsibility }}</li>
+                </ul>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Education Tab -->
+      <mat-tab label="Education">
+        <div class="p-4">
+          <mat-card class="section-card" *ngFor="let edu of data.education">
+            <mat-card-header>
+              <mat-card-title class="text-xl font-semibold">{{ edu.degree }}</mat-card-title>
+              <mat-card-subtitle>
+                {{ edu.institution }}
+                <span class="text-gray-500 ml-2">
+                  {{ edu.startDate | date:'yyyy' }} - 
+                  {{ edu.current ? 'Present' : (edu.endDate | date:'yyyy') }}
+                </span>
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="my-2">{{ edu.field }}</p>
+              
+              <div *ngIf="edu.grade" class="mb-2">
+                <span class="font-semibold">Grade:</span> {{ edu.grade }}
+              </div>
+
+              <!-- Achievements -->
+              <div *ngIf="edu.achievements?.length">
+                <h4 class="font-semibold mb-2">Achievements</h4>
+                <ul class="list-disc list-inside">
+                  <li *ngFor="let achievement of edu.achievements">{{ achievement }}</li>
+                </ul>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Projects Tab -->
+      <mat-tab label="Projects" *ngIf="data.projects?.length">
+        <div class="p-4">
+          <mat-card class="section-card" *ngFor="let project of data.projects">
+            <mat-card-header>
+              <mat-card-title class="text-xl font-semibold">{{ project.name }}</mat-card-title>
+              <mat-card-subtitle>
+                {{ project.role }}
+                <span class="text-gray-500 ml-2">
+                  {{ project.startDate | date:'MMM yyyy' }} - 
+                  {{ project.endDate ? (project.endDate | date:'MMM yyyy') : 'Present' }}
+                </span>
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="my-3">{{ project.description }}</p>
+
+              <!-- Technologies -->
+              <div *ngIf="project.technologies?.length" class="mb-3">
+                <h4 class="font-semibold mb-2">Technologies Used</h4>
+                <div class="flex flex-wrap gap-2">
+                  <mat-chip *ngFor="let tech of project.technologies" color="accent">
+                    {{ tech }}
+                  </mat-chip>
+                </div>
+              </div>
+
+              <!-- Highlights -->
+              <div *ngIf="project.highlights?.length">
+                <h4 class="font-semibold mb-2">Key Achievements</h4>
+                <ul class="list-disc list-inside">
+                  <li *ngFor="let highlight of project.highlights">{{ highlight }}</li>
+                </ul>
+              </div>
+
+              <!-- Project URL -->
+              <div *ngIf="project.url" class="mt-3">
+                <a [href]="project.url" target="_blank" class="text-blue-600 hover:underline">
+                  <mat-icon class="align-middle mr-1">launch</mat-icon>
+                  View Project
+                </a>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Certifications Tab -->
+      <mat-tab label="Certifications" *ngIf="data.certifications?.length">
+        <div class="p-4">
+          <mat-card class="section-card" *ngFor="let cert of data.certifications">
+            <mat-card-header>
+              <mat-card-title class="text-xl font-semibold">{{ cert.name }}</mat-card-title>
+              <mat-card-subtitle>
+                {{ cert.issuingOrganization }}
+                <span class="text-gray-500 ml-2">
+                  Issued: {{ cert.issueDate | date:'MMM yyyy' }}
+                  <span *ngIf="cert.expiryDate">
+                    (Expires: {{ cert.expiryDate | date:'MMM yyyy' }})
+                  </span>
+                </span>
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div *ngIf="cert.credentialId" class="mb-2">
+                <span class="font-semibold">Credential ID:</span> {{ cert.credentialId }}
+              </div>
+              <div *ngIf="cert.credentialUrl">
+                <a [href]="cert.credentialUrl" target="_blank" class="text-blue-600 hover:underline">
+                  <mat-icon class="align-middle mr-1">verified</mat-icon>
+                  Verify Credential
+                </a>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions-footer">
+  <button mat-flat-button color="primary" (click)="scrollToTop()" *ngIf="isContentScrollable()">
+    <mat-icon>arrow_upward</mat-icon> Back to Top
+  </button>
+  <button mat-flat-button color="warn" (click)="dialogRef.close()">
+    <mat-icon>close</mat-icon> Close
+  </button>
+  <button mat-flat-button color="accent" (click)="onEditClick()" *ngIf="data?._id">
+    <mat-icon>edit</mat-icon> Edit Profile
+  </button>
+</mat-dialog-actions> 
