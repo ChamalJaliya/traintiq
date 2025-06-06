@@ -8,6 +8,11 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       {
+        path: 'question-grading',
+        loadChildren: () => import('../domains/question-grading/question-grading.module')
+          .then(m => m.QuestionGradingModule)
+      },
+      {
         path: 'company',
         children: [
           {
@@ -69,7 +74,7 @@ export const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'company/generator',
+        redirectTo: 'question-grading',
         pathMatch: 'full'
       }
     ]

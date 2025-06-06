@@ -1,0 +1,81 @@
+<div class="question-creator-container">
+    <mat-card class="form-card">
+        <mat-card-header>
+            <mat-card-title>Create New Question</mat-card-title>
+            <mat-card-subtitle>Add a new question to the question pool</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Question Text</mat-label>
+                    <textarea matInput formControlName="text" rows="3" placeholder="Enter your question"></textarea>
+                    <mat-error *ngIf="questionForm.get('text')?.hasError('required')">
+                        Question text is required
+                    </mat-error>
+                    <mat-error *ngIf="questionForm.get('text')?.hasError('minlength')">
+                        Question must be at least 10 characters long
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Correct Answer</mat-label>
+                    <textarea matInput formControlName="correctAnswer" rows="3" placeholder="Enter the correct answer"></textarea>
+                    <mat-error *ngIf="questionForm.get('correctAnswer')?.hasError('required')">
+                        Correct answer is required
+                    </mat-error>
+                    <mat-error *ngIf="questionForm.get('correctAnswer')?.hasError('minlength')">
+                        Answer must be at least 2 characters long
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Category</mat-label>
+                    <input matInput formControlName="category" placeholder="Enter category (optional)">
+                </mat-form-field>
+
+                <button mat-raised-button color="primary" type="submit" [disabled]="!questionForm.valid">
+                    <mat-icon>add</mat-icon>
+                    Add Question
+                </button>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="questions-list">
+        <mat-card-header>
+            <mat-card-title>
+                <div class="header-with-count">
+                    Existing Questions
+                    <span class="question-count">{{questions.length}} Questions</span>
+                </div>
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="questions-grid">
+                <mat-card class="question-item" *ngFor="let question of questions">
+                    <mat-card-content>
+                        <div class="question-header">
+                            <mat-icon class="category-icon" [matTooltip]="question.category || 'Uncategorized'">
+                                {{getCategoryIcon(question.category)}}
+                            </mat-icon>
+                            <span class="category-label" *ngIf="question.category">{{question.category}}</span>
+                        </div>
+                        <div class="question-text">{{question.text}}</div>
+                        <div class="answer-section">
+                            <div class="answer-label">Correct Answer:</div>
+                            <div class="answer-text">{{question.correctAnswer}}</div>
+                        </div>
+                        <div class="question-footer">
+                            <span class="timestamp">Added {{question.createdAt | date:'medium'}}</span>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+            
+            <div *ngIf="questions.length === 0" class="no-questions">
+                <mat-icon>quiz</mat-icon>
+                <p>No questions added yet. Start by creating your first question!</p>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div> 
