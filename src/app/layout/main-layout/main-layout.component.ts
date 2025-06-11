@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -21,7 +22,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
-    MatDividerModule
+    MatDividerModule,
+    ChatBotComponent
   ],
   template: `
     <mat-drawer-container class="app-container">
@@ -111,6 +113,9 @@ import { MatDividerModule } from '@angular/material/divider';
         <div class="main-content">
           <router-outlet></router-outlet>
         </div>
+        
+        <!-- Chat Bot Component -->
+        <app-chat-bot></app-chat-bot>
       </mat-drawer-content>
     </mat-drawer-container>
   `,
