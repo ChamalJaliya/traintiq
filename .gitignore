@@ -40,3 +40,48 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# ==========================================
+# SECURITY: Environment and Configuration Files
+# ==========================================
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+*.env
+
+# Configuration files with sensitive data
+config.env
+.config
+local.config
+settings.local.*
+
+# API Keys and Secrets
+**/api_keys.txt
+**/secrets.json
+**/credentials.*
+api-keys.*
+
+# Backend specific
+traintiq_scrapping_backend/.env*
+traintiq_scrapping_backend/config.env
+traintiq_scrapping_backend/instance/
+traintiq_scrapping_backend/logs/*.log
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Docker environment files
+docker.env
+.docker.env
+
+# Temporary files with sensitive data
+temp_*_with_keys.*
+*_backup_with_secrets.*
