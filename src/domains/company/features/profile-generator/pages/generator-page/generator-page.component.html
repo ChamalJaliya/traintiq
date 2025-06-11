@@ -3,57 +3,138 @@
   <div class="generator-card">
     <div class="card-header">
       <h1 class="title">Traintiq</h1>
-      <p class="subtitle">Profile Generator</p>
+      <p class="subtitle">Enhanced Profile Generator</p>
+      <p class="description">Generate comprehensive company profiles from multiple URLs and documents</p>
     </div>
 
     <div class="form-content">
-      <!-- Company URL Input -->
-      <mat-form-field appearance="outline">
-        <mat-label>Company Website URL*</mat-label>
-        <input matInput 
-               [(ngModel)]="companyUrl" 
-               placeholder="e.g., https://www.example.com" 
-               [disabled]="isLoading"
-               #urlInput="ngModel"
-               required
-               pattern="^https?://.*">
-        <mat-icon matPrefix>language</mat-icon>
-        <button *ngIf="companyUrl" 
-                matSuffix 
-                mat-icon-button 
-                aria-label="Clear" 
-                (click)="companyUrl=''"
-                [disabled]="isLoading">
-          <mat-icon>close</mat-icon>
-        </button>
-        <mat-hint>Enter the full URL of the company's official website</mat-hint>
-        <mat-error *ngIf="urlInput.errors?.['required']">URL is required</mat-error>
-        <mat-error *ngIf="urlInput.errors?.['pattern']">Please enter a valid URL starting with http:// or https://</mat-error>
-      </mat-form-field>
+      <!-- Multiple URLs Section -->
+      <div class="section-header">
+        <mat-icon>language</mat-icon>
+        <h3>Website URLs</h3>
+      </div>
+      
+      <div class="url-inputs">
+        <mat-form-field appearance="outline" *ngFor="let url of companyUrls; let i = index">
+          <mat-label>Website URL {{i + 1}}{{i === 0 ? ' (Required)' : ' (Optional)'}}</mat-label>
+          <input matInput 
+                 [(ngModel)]="companyUrls[i]" 
+                 placeholder="e.g., https://www.example.com" 
+                 [disabled]="isLoading"
+                 [required]="i === 0"
+                 pattern="^https?://.*">
+          <mat-icon matPrefix>link</mat-icon>
+          <button *ngIf="companyUrls[i]" 
+                  matSuffix 
+                  mat-icon-button 
+                  aria-label="Clear" 
+                  (click)="clearUrl(i)"
+                  [disabled]="isLoading">
+            <mat-icon>close</mat-icon>
+          </button>
+          <button *ngIf="i > 0" 
+                  matSuffix 
+                  mat-icon-button 
+                  aria-label="Remove URL" 
+                  (click)="removeUrl(i)"
+                  [disabled]="isLoading"
+                  class="remove-url-btn">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
 
-      <!-- Custom Instructions -->
-      <mat-form-field appearance="outline">
-        <mat-label>Custom Instructions</mat-label>
+      <button mat-stroked-button 
+              class="add-url-btn" 
+              (click)="addUrl()" 
+              [disabled]="isLoading || companyUrls.length >= 5">
+        <mat-icon>add</mat-icon>
+        Add Another URL ({{companyUrls.length}}/5)
+      </button>
+
+      <!-- Document Upload Section -->
+      <div class="section-header">
+        <mat-icon>upload_file</mat-icon>
+        <h3>Upload Documents</h3>
+      </div>
+
+      <div class="file-upload-container">
+        <input type="file" 
+               #fileInput 
+               multiple 
+               accept=".pdf,.docx,.doc" 
+               (change)="onFilesSelected($event)"
+               [disabled]="isLoading"
+               style="display: none;">
+        
+        <button mat-stroked-button 
+                class="upload-btn" 
+                (click)="fileInput.click()" 
+                [disabled]="isLoading">
+          <mat-icon>cloud_upload</mat-icon>
+          Select Documents (PDF, DOCX)
+        </button>
+
+        <div class="file-list" *ngIf="selectedFiles.length > 0">
+          <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
+            <mat-icon class="file-icon">{{getFileIcon(file.name)}}</mat-icon>
+            <span class="file-name">{{file.name}}</span>
+            <span class="file-size">({{formatFileSize(file.size)}})</span>
+            <button mat-icon-button 
+                    class="remove-file-btn" 
+                    (click)="removeFile(i)"
+                    [disabled]="isLoading">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="upload-hint">
+          <mat-icon class="hint-icon">info</mat-icon>
+          Upload PDF or DOCX documents for additional context (Max 10MB per file)
+        </div>
+      </div>
+
+      <!-- Enhanced Custom Instructions -->
+      <div class="section-header">
+        <mat-icon>edit_note</mat-icon>
+        <h3>Custom Instructions</h3>
+      </div>
+
+      <mat-form-field appearance="outline" class="custom-instructions">
+        <mat-label>Specific Focus Areas</mat-label>
         <textarea matInput
                   [(ngModel)]="customInstructions"
-                  rows="4"
-                  placeholder="Add specific instructions to customize the profile generation..."
+                  rows="6"
+                  placeholder="Specify what you'd like to focus on:&#10;&#10;Examples:&#10;• Focus on technology stack and development team&#10;• Emphasize recent funding rounds and financial information&#10;• Highlight key leadership and management structure&#10;• Extract product portfolio and service offerings&#10;• Identify competitors and market positioning"
                   [disabled]="isLoading"></textarea>
-        <mat-icon matPrefix>edit_note</mat-icon>
+        <mat-icon matPrefix>psychology</mat-icon>
         <mat-hint>
-          <mat-icon class="hint-icon">info</mat-icon>
-          Optional: Provide specific details you'd like to focus on
+          <mat-icon class="hint-icon">lightbulb</mat-icon>
+          Provide specific instructions to customize the profile generation focus
         </mat-hint>
       </mat-form-field>
+
+      <!-- Quick Focus Chips -->
+      <div class="focus-chips">
+        <mat-chip-listbox>
+          <mat-chip-option 
+            *ngFor="let focus of quickFocusOptions" 
+            (click)="addQuickFocus(focus)"
+            [disabled]="isLoading">
+            {{focus}}
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
 
       <!-- Button Container -->
       <div class="button-container">
         <button mat-flat-button
                 class="generate-btn"
                 (click)="generateProfile()"
-                [disabled]="isLoading || !companyUrl.trim() || urlInput.invalid">
+                [disabled]="isLoading || !hasValidInput()">
           <mat-icon>auto_awesome</mat-icon>
-          Generate Profile
+          Generate Enhanced Profile
         </button>
 
         <button mat-stroked-button
@@ -61,17 +142,37 @@
                 (click)="resetForm()"
                 [disabled]="isLoading">
           <mat-icon>refresh</mat-icon>
-          Reset
+          Reset All
         </button>
       </div>
 
       <!-- Loading Container -->
       <div class="loading-container" *ngIf="isLoading">
-        <div class="progress-bar">
-          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <div class="progress-info">
+          <div class="progress-bar">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          </div>
+          <div class="loading-steps">
+            <div class="step" [class.active]="currentStep >= 1">
+              <mat-icon>language</mat-icon>
+              <span>Scraping Websites</span>
+            </div>
+            <div class="step" [class.active]="currentStep >= 2" *ngIf="selectedFiles.length > 0">
+              <mat-icon>description</mat-icon>
+              <span>Processing Documents</span>
+            </div>
+            <div class="step" [class.active]="currentStep >= 3">
+              <mat-icon>psychology</mat-icon>
+              <span>Extracting Information</span>
+            </div>
+            <div class="step" [class.active]="currentStep >= 4">
+              <mat-icon>auto_awesome</mat-icon>
+              <span>Generating Profile</span>
+            </div>
+          </div>
         </div>
         <div class="loading-text">
-          Generating Profile
+          {{loadingMessage}}
           <span class="dots">
             <span class="dot"></span>
             <span class="dot"></span>

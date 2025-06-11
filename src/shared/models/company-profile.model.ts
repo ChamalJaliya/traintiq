@@ -171,6 +171,8 @@ export interface CompanyProfile {
  * This is used when sending data from the frontend to the backend's generation endpoint.
  */
 export interface ProfileGenerationRequest {
-  url: string; // The company website URL to scrape
+  urls: string[]; // One or more company website URLs to scrape
   customInstructions?: string; // Optional instructions for the AI model
+  documentContent?: string[]; // Optional extracted text content from uploaded documents
+  documentNames?: string[]; // Optional names of uploaded documents
 }
