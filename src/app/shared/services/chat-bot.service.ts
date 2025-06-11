@@ -1,10 +1,24 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, delay, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, of, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ChatResponse {
-  text: string;
-  type?: 'text' | 'quick-reply' | 'card';
-  quickReplies?: string[];
+  success: boolean;
+  response: string;
+  quick_replies?: string[];
+  session_id?: string;
+  conversation_id?: number;
+  timestamp?: string;
+  tokens_used?: number;
+  response_time?: number;
+  error?: string;
+}
+
+export interface ChatRequest {
+  message: string;
+  session_id?: string;
+  conversation_history?: Array<{role: string, content: string}>;
 }
 
 @Injectable({
@@ -13,111 +27,147 @@ export interface ChatResponse {
 export class ChatBotService {
   private isTypingSubject = new BehaviorSubject<boolean>(false);
   public isTyping$ = this.isTypingSubject.asObservable();
+  
+  private apiUrl = environment.apiUrl || 'http://localhost:5000/api';
+  private sessionId: string = '';
+  
+  constructor(private http: HttpClient) {
+    this.generateSessionId();
+  }
 
-  private readonly mockResponses = {
-    'company_info': [
-      {
-        text: 'TraintiQ was founded in 2020 with a mission to revolutionize employee training and development through AI-powered solutions. 🚀',
-        quickReplies: ['Our Services', 'Company Culture', 'Career Opportunities']
-      },
-      {
-        text: 'We are a leading technology company specializing in AI-driven HR solutions, helping companies optimize their talent management processes. 💼',
-        quickReplies: ['Products', 'Contact Sales', 'Demo Request']
-      },
-      {
-        text: 'Our global team of 1000+ professionals operates from offices in major cities worldwide, serving Fortune 500 companies. 🌍',
-        quickReplies: ['Our Locations', 'Join Our Team', 'Company News']
-      }
-    ],
-    'services': [
-      {
-        text: 'Our core services include:\n• AI-Powered CV Analysis 📄\n• Employee Profile Generation 👤\n• Skills Assessment & Matching 🎯\n• Training Program Optimization 📈',
-        quickReplies: ['Learn More', 'Request Demo', 'Pricing']
-      }
-    ],
-    'contact': [
-      {
-        text: 'Get in touch with us:\n📧 Email: contact@traintiq.com\n📞 Phone: 1-800-TRAINTIQ\n💬 Live Chat: Available 24/7',
-        quickReplies: ['Schedule Call', 'Email Support', 'Live Agent']
-      },
-      {
-        text: 'Our support team is here to help! Choose how you\'d like to connect with us:',
-        quickReplies: ['Technical Support', 'Sales Inquiry', 'Partnership']
-      }
-    ],
-    'pricing': [
-      {
-        text: 'We offer flexible pricing plans:\n💎 Enterprise: Custom pricing\n🚀 Professional: $99/month\n⭐ Starter: $29/month\n\nAll plans include 24/7 support!',
-        quickReplies: ['View Details', 'Free Trial', 'Contact Sales']
-      }
-    ],
-    'culture': [
-      {
-        text: 'At TraintiQ, we believe in:\n🌟 Innovation & Excellence\n🤝 Collaboration & Teamwork\n📚 Continuous Learning\n🌱 Work-Life Balance\n🎯 Results-Driven Approach',
-        quickReplies: ['Career Opportunities', 'Employee Benefits', 'Our Values']
-      }
-    ],
-    'greeting': [
-      {
-        text: 'Hello! I\'m Alex, your TraintiQ assistant! 👋 I\'m here to help you learn about our company and services. What would you like to know?',
-        quickReplies: ['About TraintiQ', 'Our Services', 'Contact Info', 'Pricing']
-      }
-    ],
-    'default': [
-      {
-        text: 'I\'d be happy to help you with that! Let me connect you with the right information. 🤔',
-        quickReplies: ['Company Info', 'Our Services', 'Contact Support']
-      },
-      {
-        text: 'That\'s a great question! While I don\'t have specific details on that, I can help you with general company information. 💡',
-        quickReplies: ['About Us', 'Services', 'Get in Touch']
-      }
-    ]
-  };
-
-  constructor() { }
+  private generateSessionId(): void {
+    this.sessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
 
   async getBotResponse(message: string): Promise<ChatResponse> {
     // Set typing indicator
     this.isTypingSubject.next(true);
     
-    // Simulate realistic typing delay (1-3 seconds)
-    const typingDelay = Math.random() * 2000 + 1000;
-    await new Promise(resolve => setTimeout(resolve, typingDelay));
+    try {
+      const request: ChatRequest = {
+        message: message,
+        session_id: this.sessionId
+      };
 
-    const lowerMessage = message.toLowerCase();
-    let response: ChatResponse;
-    
-    // Enhanced keyword matching
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-      response = this.getRandomResponse('greeting');
-    } else if (lowerMessage.includes('service') || lowerMessage.includes('product') || lowerMessage.includes('what do you do')) {
-      response = this.getRandomResponse('services');
-    } else if (lowerMessage.includes('company') || lowerMessage.includes('about') || lowerMessage.includes('traintiq')) {
-      response = this.getRandomResponse('company_info');
-    } else if (lowerMessage.includes('contact') || lowerMessage.includes('email') || lowerMessage.includes('phone') || lowerMessage.includes('support')) {
-      response = this.getRandomResponse('contact');
-    } else if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('plan') || lowerMessage.includes('pricing')) {
-      response = this.getRandomResponse('pricing');
-    } else if (lowerMessage.includes('culture') || lowerMessage.includes('value') || lowerMessage.includes('work') || lowerMessage.includes('team')) {
-      response = this.getRandomResponse('culture');
-    } else {
-      response = this.getRandomResponse('default');
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
+
+      // Make API call
+      const response = await this.http.post<ChatResponse>(
+        `${this.apiUrl}/chat/message`,
+        request,
+        { headers }
+      ).pipe(
+        tap(() => {
+          // Update session ID from response if provided
+        }),
+        catchError((error) => {
+          console.error('Chat API Error:', error);
+          // Return fallback response on error
+          return of(this.createFallbackResponse(error.message || 'Network error occurred'));
+        })
+      ).toPromise();
+
+      // Remove typing indicator
+      this.isTypingSubject.next(false);
+      
+      // Update session ID if provided in response
+      if (response && response.session_id) {
+        this.sessionId = response.session_id;
+      }
+
+      return response || this.createFallbackResponse('No response received');
+      
+    } catch (error) {
+      // Remove typing indicator
+      this.isTypingSubject.next(false);
+      
+      console.error('Chat service error:', error);
+      return this.createFallbackResponse('Failed to connect to chat service');
     }
-
-    // Remove typing indicator
-    this.isTypingSubject.next(false);
-    
-    return response;
   }
 
-  private getRandomResponse(category: keyof typeof this.mockResponses): ChatResponse {
-    const responses = this.mockResponses[category];
-    const randomIndex = Math.floor(Math.random() * responses.length);
-    return responses[randomIndex];
+  private createFallbackResponse(error?: string): ChatResponse {
+    const fallbackMessages = [
+      "I apologize, but I'm having trouble connecting to our servers right now. Please try again in a moment or contact our support team at support@traintiq.com.",
+      "Our AI assistant is temporarily unavailable. For immediate assistance, please reach out to our support team."
+    ];
+    
+    const randomIndex = Math.floor(Math.random() * fallbackMessages.length);
+    
+    return {
+      success: false,
+      response: fallbackMessages[randomIndex],
+      quick_replies: ['Try Again', 'Contact Support', 'Technical Help'],
+      error: error,
+      timestamp: new Date().toISOString()
+    };
   }
 
   getTypingStatus(): Observable<boolean> {
     return this.isTyping$;
+  }
+
+  // Get conversation starters from API
+  async getConversationStarters(): Promise<string[]> {
+    try {
+      const response = await this.http.get<{success: boolean, starters: string[]}>(
+        `${this.apiUrl}/chat/starters`
+      ).pipe(
+        catchError((error) => {
+          console.error('Error fetching conversation starters:', error);
+          return of({
+            success: false,
+            starters: [
+              "What services does TraintiQ offer?",
+              "Tell me about your AI-powered CV analysis",
+              "What are your pricing plans?",
+              "How can I contact support?",
+              "What makes TraintiQ different?"
+            ]
+          });
+        })
+      ).toPromise();
+
+      return response?.starters || [];
+    } catch (error) {
+      console.error('Error in getConversationStarters:', error);
+      return [
+        "What services does TraintiQ offer?",
+        "Tell me about your AI-powered CV analysis",
+        "What are your pricing plans?",
+        "How can I contact support?"
+      ];
+    }
+  }
+
+  // Check if chat service is healthy
+  async checkHealth(): Promise<boolean> {
+    try {
+      const response = await this.http.get<{success: boolean, openai_configured: boolean}>(
+        `${this.apiUrl}/chat/health`
+      ).pipe(
+        catchError((error) => {
+          console.error('Health check failed:', error);
+          return of({ success: false, openai_configured: false });
+        })
+      ).toPromise();
+
+      return response?.success && response?.openai_configured || false;
+    } catch (error) {
+      console.error('Health check error:', error);
+      return false;
+    }
+  }
+
+  // Reset session (useful for starting fresh conversation)
+  resetSession(): void {
+    this.generateSessionId();
+  }
+
+  // Get current session ID
+  getSessionId(): string {
+    return this.sessionId;
   }
 } 

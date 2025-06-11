@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { ChatMessage } from '../../models/chat-message.model';
 import { ChatBotService, ChatResponse } from '../../services/chat-bot.service';
 import { Subscription } from 'rxjs';
@@ -10,7 +11,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './chat-bot.component.html',
   styleUrls: ['./chat-bot.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, HttpClientModule]
 })
 export class ChatBotComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -21,6 +22,7 @@ export class ChatBotComponent implements OnInit, OnDestroy, AfterViewChecked {
   currentMessage = '';
   isTyping = false;
   unreadCount = 0;
+  isApiHealthy = false;
   
   private typingSubscription?: Subscription;
   private shouldScrollToBottom = false;
@@ -33,11 +35,15 @@ export class ChatBotComponent implements OnInit, OnDestroy, AfterViewChecked {
       typing => this.isTyping = typing
     );
 
+    // Check API health
+    this.checkApiHealth();
+
     // Add initial welcome message with quick replies
     setTimeout(() => {
       this.addBotMessage({
-        text: 'Hello! I\'m Alex, your TraintiQ assistant! 👋 I\'m here to help you learn about our company and services. What would you like to know?',
-        quickReplies: ['About TraintiQ', 'Our Services', 'Contact Info', 'Pricing']
+        success: true,
+        response: 'Hello! I\'m Alex, your TraintiQ assistant! 👋 I\'m here to help you learn about our company and services. What would you like to know?',
+        quick_replies: ['About TraintiQ', 'Our Services', 'Contact Info', 'Pricing']
       });
     }, 1000);
   }
@@ -52,6 +58,18 @@ export class ChatBotComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.shouldScrollToBottom) {
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
+    }
+  }
+
+  async checkApiHealth(): Promise<void> {
+    try {
+      this.isApiHealthy = await this.chatBotService.checkHealth();
+      if (!this.isApiHealthy) {
+        console.warn('Chat API is not healthy - falling back to local responses');
+      }
+    } catch (error) {
+      console.error('Failed to check API health:', error);
+      this.isApiHealthy = false;
     }
   }
 
@@ -90,9 +108,18 @@ export class ChatBotComponent implements OnInit, OnDestroy, AfterViewChecked {
     try {
       const response = await this.chatBotService.getBotResponse(messageText);
       this.addBotMessage(response);
+      
+      // Log API usage for analytics
+      if (response.success && response.tokens_used) {
+        console.log(`API call successful - Tokens used: ${response.tokens_used}, Response time: ${response.response_time}ms`);
+      }
     } catch (error) {
+      console.error('Error getting bot response:', error);
       this.addBotMessage({
-        text: 'Sorry, I\'m having trouble connecting right now. Please try again later. 😔'
+        success: false,
+        response: 'Sorry, I\'m having trouble connecting right now. Please try again later. 😔',
+        quick_replies: ['Try Again', 'Contact Support'],
+        error: 'Connection failed'
       });
     }
   }
@@ -117,11 +144,11 @@ export class ChatBotComponent implements OnInit, OnDestroy, AfterViewChecked {
   private addBotMessage(response: ChatResponse): void {
     const message: ChatMessage = {
       id: this.generateId(),
-      text: response.text,
+      text: response.response,
       isBot: true,
       timestamp: new Date(),
-      type: response.type || 'text',
-      quickReplies: response.quickReplies,
+      type: response.success ? 'text' : 'error',
+      quickReplies: response.quick_replies || [],
       avatar: '🤖'
     };
     
@@ -153,5 +180,23 @@ export class ChatBotComponent implements OnInit, OnDestroy, AfterViewChecked {
   // Track by function for better performance
   trackByMessageId(index: number, message: ChatMessage): string {
     return message.id || index.toString();
+  }
+
+  // Retry failed message
+  retryLastMessage(): void {
+    const lastUserMessage = this.messages
+      .filter(msg => !msg.isBot)
+      .pop();
+    
+    if (lastUserMessage) {
+      this.sendMessage(lastUserMessage.text);
+    }
+  }
+
+  // Reset chat session
+  resetChat(): void {
+    this.messages = [];
+    this.chatBotService.resetSession();
+    this.ngOnInit(); // Re-initialize with welcome message
   }
 } 

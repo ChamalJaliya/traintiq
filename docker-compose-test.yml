@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./traintiq_scrapping_backend
+      dockerfile: Dockerfile
+    container_name: traintiq_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=sqlite:///traintiq.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      - ./traintiq_scrapping_backend/logs:/app/logs
+    networks:
+      - traintiq_network
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./traintiq
+      dockerfile: Dockerfile
+    container_name: traintiq_frontend
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - traintiq_network
+    depends_on:
+      - backend
+
+networks:
+  traintiq_network:
+    driver: bridge 
