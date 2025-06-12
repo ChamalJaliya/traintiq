@@ -408,9 +408,13 @@ export class PoolPageComponent implements OnInit {
       panelClass: 'profile-viewer-dialog'
     });
 
-    dialogRef.componentInstance.editProfile.subscribe((profileId: string) => {
-      this.router.navigate(['../profiles', profileId, 'edit'], { relativeTo: this.route });
-    });
+    // Type assertion to fix compilation error
+    const dialogComponent = dialogRef.componentInstance as any;
+    if (dialogComponent.editProfile) {
+      dialogComponent.editProfile.subscribe((profileId: string) => {
+        this.router.navigate(['../profiles', profileId, 'edit'], { relativeTo: this.route });
+      });
+    }
   }
 
   getSkillLevelText(level: number): string {

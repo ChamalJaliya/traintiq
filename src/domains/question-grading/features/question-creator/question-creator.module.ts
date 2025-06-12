@@ -13,18 +13,9 @@ import { QuestionCreatorComponent } from './pages/question-creator/question-crea
 
 @NgModule({
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
         RouterModule.forChild([
             { path: '', component: QuestionCreatorComponent }
-        ]),
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatSnackBarModule,
-        MatListModule,
-        QuestionCreatorComponent
+        ])
     ]
 })
 export class QuestionCreatorModule { } 

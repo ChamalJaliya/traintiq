@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 
 // Update service and model imports
@@ -30,6 +31,7 @@ import { CompanyProfileService } from '../../../../data/company-profile.service'
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
+    MatTooltipModule,
     RouterModule
   ]
 })

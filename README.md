@@ -1,59 +1,129 @@
-# Traintiq
+# TraintiQ Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.1.
+A modern Angular application for AI-powered company profile generation with advanced scraping capabilities.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- 🤖 **AI-Powered Profile Generation**: Generate comprehensive company profiles using GPT-4
+- 🌐 **Web Scraping**: Extract data from company websites automatically  
+- 📊 **Interactive Dashboard**: Modern Material Design interface
+- 🔧 **Customizable Templates**: Flexible profile generation with custom instructions
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
 
+## Prerequisites
+
+- Node.js 18+ and npm
+- Angular CLI 17+
+- Backend API running (see backend README)
+
+## Manual Development Setup
+
+### 1. Install Dependencies
 ```bash
+npm install
+```
+
+### 2. Environment Configuration
+Create or update `config.env`:
+```env
+# API Configuration
+API_BASE_URL=http://localhost:5000/api
+FRONTEND_PORT=4200
+
+# Optional: Custom settings
+ENABLE_DEBUG=true
+```
+
+### 3. Start Development Server
+```bash
+npm start
+# or
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The application will be available at `http://localhost:4200`
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### 4. Build for Production
 ```bash
-ng generate component component-name
+npm run build
+# or
+ng build --configuration production
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Docker Setup
 
+### 1. Build Docker Image
 ```bash
-ng generate --help
+docker build -t traintiq-frontend .
 ```
 
-## Building
-
-To build the project run:
-
+### 2. Run with Docker
 ```bash
-ng build
+docker run -p 4200:80 traintiq-frontend
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
+### 3. Docker Compose (Recommended)
 ```bash
-ng test
+# Start entire system (frontend + backend)
+docker-compose up -d
+
+# Start only frontend
+docker-compose up frontend
 ```
 
-## Running end-to-end tests
+## Project Structure
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
+```
+src/
+├── domains/           # Feature modules
+│   └── company/       # Company profile features
+├── shared/           # Shared components and services
+├── core/             # Core application services
+└── assets/           # Static assets
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Available Scripts
 
-## Additional Resources
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm run test` - Run unit tests
+- `npm run lint` - Run linting
+- `npm run e2e` - Run end-to-end tests
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## API Integration
+
+The frontend communicates with the backend API for:
+- Company profile generation
+- Web scraping operations
+- Template management
+- Chat functionality
+
+Ensure the backend is running before starting the frontend.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **API Connection Failed**
+   - Verify backend is running on correct port
+   - Check `config.env` API_BASE_URL setting
+
+2. **Build Errors**
+   - Clear node_modules: `rm -rf node_modules && npm install`
+   - Update Angular CLI: `npm install -g @angular/cli@latest`
+
+3. **Docker Issues**
+   - Ensure Docker is running
+   - Check port conflicts: `docker ps`
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## License
+
+This project is proprietary software.

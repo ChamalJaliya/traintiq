@@ -388,3 +388,261 @@
     }
   }
 }
+
+// Enhanced Products & Services styling
+.products-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.product-service-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e8eaff;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3949ab, #5c6bc0);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(57, 73, 171, 0.15);
+    border-color: #3949ab;
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &.featured {
+    background: linear-gradient(135deg, #e8eaff 0%, #f0f4ff 100%);
+    border-color: #3949ab;
+
+    &::before {
+      opacity: 1;
+    }
+
+    .product-name {
+      color: #1a237e;
+    }
+  }
+
+  .product-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .product-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(57, 73, 171, 0.1);
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .product-info {
+      flex: 1;
+
+      .product-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0 0 0.25rem 0;
+        line-height: 1.3;
+      }
+
+      .product-category {
+        font-size: 0.85rem;
+        color: #3949ab;
+        background: rgba(57, 73, 171, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 500;
+        display: inline-block;
+      }
+    }
+  }
+
+  .product-description {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .product-tags {
+    margin-bottom: 1rem;
+
+    mat-chip-set {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .service-tag {
+      background: rgba(57, 73, 171, 0.1);
+      color: #3949ab;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 16px;
+      border: 1px solid rgba(57, 73, 171, 0.2);
+    }
+  }
+
+  .product-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.85rem;
+
+    .meta-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+// Enhanced Tech Stack styling
+.tech-stack-section {
+  margin: 1.5rem 0;
+
+  .tech-stack-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .tech-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border: 1px solid #e0e4ff;
+    border-radius: 24px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(57, 73, 171, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(57, 73, 171, 0.15);
+      border-color: #3949ab;
+
+      &::before {
+        left: 100%;
+      }
+
+      .tech-name {
+        color: #1a237e;
+      }
+
+      .tech-icon {
+        color: #3949ab;
+        transform: scale(1.1);
+      }
+    }
+
+    .tech-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #666;
+      transition: all 0.3s ease;
+    }
+
+    .tech-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #444;
+      transition: color 0.3s ease;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .products-services-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .product-service-card {
+    padding: 1rem;
+
+    .product-header {
+      .product-icon {
+        width: 40px;
+        height: 40px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .product-info .product-name {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .tech-stack-grid {
+    gap: 0.5rem;
+  }
+
+  .tech-chip {
+    padding: 0.4rem 0.8rem;
+
+    .tech-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .tech-name {
+      font-size: 0.85rem;
+    }
+  }
+}

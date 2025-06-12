@@ -13,18 +13,9 @@ import { QuestionAnsweringComponent } from './pages/question-answering/question-
 
 @NgModule({
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
         RouterModule.forChild([
             { path: '', component: QuestionAnsweringComponent }
-        ]),
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatSnackBarModule,
-        MatProgressSpinnerModule,
-        QuestionAnsweringComponent
+        ])
     ]
 })
 export class QuestionAnsweringModule { } 

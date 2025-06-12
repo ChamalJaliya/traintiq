@@ -1,17 +1,67 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs'; // 'of' is used for simulating HTTP responses
 import { CompanyProfile, ProfileGenerationRequest } from '../../../shared/models/company-profile.model';
 // Update model import path
 
+export interface EnhancedProfileGenerationRequest {
+  urls: string[];
+  customInstructions?: string;
+  files?: File[];
+}
+
+export interface EnhancedProfileGenerationResponse {
+  status: 'processing' | 'completed' | 'failed';
+  scraped_data: any;
+  processed_documents: any[];
+  extracted_company_data: any;
+  generated_profile: string;
+  errors: string[];
+  metadata: any;
+  profile_id?: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CompanyProfileService {
-  private apiUrl = '/api/company-profiles'; // Mock API base
+  private apiUrl = '/api/profiles'; // Updated to match backend routes
 
   constructor(private http: HttpClient) { }
+
+  generateEnhancedProfile(request: EnhancedProfileGenerationRequest): Observable<EnhancedProfileGenerationResponse> {
+    const formData = new FormData();
+    
+    // Add URLs to form data
+    request.urls.forEach(url => {
+      if (url.trim()) {
+        formData.append('urls', url.trim());
+      }
+    });
+    
+    // Add custom instructions if provided
+    if (request.customInstructions) {
+      formData.append('custom_instructions', request.customInstructions);
+    }
+    
+    // Add files if provided
+    if (request.files && request.files.length > 0) {
+      request.files.forEach(file => {
+        formData.append('files', file, file.name);
+      });
+    }
+    
+    return this.http.post<EnhancedProfileGenerationResponse>(`${this.apiUrl}/generate-enhanced`, formData);
+  }
+
+  processFiles(files: File[]): Observable<any> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file, file.name);
+    });
+    
+    return this.http.post<any>('/api/companies/process-files', formData);
+  }
 
   generateProfile(request: ProfileGenerationRequest): Observable<CompanyProfile> {
     console.log('Simulating backend call for profile generation:', request);
@@ -198,6 +248,6 @@ export class CompanyProfileService {
   updateProfile(id: string, profile: CompanyProfile): Observable<CompanyProfile> {
     console.log(`Simulating backend call to update profile with ID: ${id}`, profile);
     // In a real app, this would send the update to a backend
-    return of({ ...profile, _id: id });
+    return of(profile);
   }
 }

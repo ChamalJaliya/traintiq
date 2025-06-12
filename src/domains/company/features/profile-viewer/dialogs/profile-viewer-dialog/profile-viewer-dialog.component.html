@@ -263,15 +263,31 @@
         </mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="space-y-4">
-          <div *ngFor="let product of data.relationships.productsServices" class="p-4 border border-blue-100 rounded-lg bg-blue-50">
-            <h4 class="font-semibold text-gray-800 text-lg mb-1">{{ product.name }}</h4>
-            <div class="text-sm text-blue-800 mb-2">{{ product.category }}</div>
-            <p class="text-gray-700 text-base mb-2">{{ product.description }}</p>
-            <!-- Use optional chaining for product.tags.join -->
-            <div *ngIf="product.tags?.length" class="text-xs text-gray-600">Tags: {{ product.tags?.join(', ') }}</div>
-            <!-- Use optional chaining for launchDate -->
-            <div *ngIf="product.launchDate" class="text-xs text-gray-600">Launched: {{ product.launchDate | date:'mediumDate' }}</div>
+        <div class="products-services-grid">
+          <div *ngFor="let product of data.relationships.productsServices; let i = index" 
+               class="product-service-card" 
+               [class.featured]="i < 3">
+            <div class="product-header">
+              <div class="product-icon">
+                <mat-icon [color]="i < 3 ? 'primary' : 'accent'">
+                  {{ getServiceIcon(product.name) }}
+                </mat-icon>
+              </div>
+              <div class="product-info">
+                <h4 class="product-name">{{ product.name }}</h4>
+                <span class="product-category" *ngIf="product.category">{{ product.category }}</span>
+              </div>
+            </div>
+            <p class="product-description" *ngIf="product.description">{{ product.description }}</p>
+            <div class="product-tags" *ngIf="product.tags?.length">
+              <mat-chip-set>
+                <mat-chip *ngFor="let tag of product.tags" class="service-tag">{{ tag }}</mat-chip>
+              </mat-chip-set>
+            </div>
+            <div class="product-meta" *ngIf="product.launchDate">
+              <mat-icon class="meta-icon">schedule</mat-icon>
+              <span>Launched: {{ product.launchDate | date:'mediumDate' }}</span>
+            </div>
           </div>
         </div>
       </mat-card-content>
@@ -336,9 +352,15 @@
         <div *ngIf="data.digitalPresence?.careersUrl" class="mb-2">
           <span class="font-semibold">Careers Page:</span> <a [href]="data.digitalPresence.careersUrl" target="_blank" class="text-blue-600 hover:underline">{{ data.digitalPresence.careersUrl }}</a>
         </div>
-        <!-- Use optional chaining for techStack.join -->
-        <div *ngIf="data.digitalPresence?.techStack?.length" class="mb-2">
-          <span class="font-semibold">Tech Stack:</span> {{ data.digitalPresence.techStack?.join(', ') }}
+        <!-- Tech Stack with styled chips -->
+        <div *ngIf="data.digitalPresence?.techStack?.length" class="tech-stack-section">
+          <span class="font-semibold mb-3 block">Tech Stack:</span>
+          <div class="tech-stack-grid">
+            <div *ngFor="let tech of data.digitalPresence.techStack" class="tech-chip">
+              <mat-icon class="tech-icon">{{ getTechIcon(tech) }}</mat-icon>
+              <span class="tech-name">{{ tech }}</span>
+            </div>
+          </div>
         </div>
         <!-- This was already fixed, ensuring monthlyVisitors is not undefined/null -->
         <div *ngIf="data.digitalPresence?.monthlyVisitors !== undefined && data.digitalPresence?.monthlyVisitors !== null">

@@ -20,3 +20,26 @@ html, body {
 .mat-typography {
   font-family: 'Inter', sans-serif;
 }
+
+/* Dialog styles */
+.profile-dialog {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  .mat-mdc-dialog-content {
+    padding: 0;
+    margin: 0;
+    max-height: none;
+  }
+}
+
+/* Ensure dialogs are visible */
+.cdk-overlay-container {
+  z-index: 1000;
+}
+
+.cdk-overlay-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
