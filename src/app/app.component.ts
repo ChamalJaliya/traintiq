@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, MainLayoutComponent],
+  imports: [RouterOutlet],
   template: `
-    <app-main-layout></app-main-layout>
+    <router-outlet></router-outlet>
   `
 })
 export class AppComponent {

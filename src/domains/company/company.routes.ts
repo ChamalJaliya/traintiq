@@ -20,5 +20,9 @@ export const COMPANY_ROUTES: Routes = [
     path: 'history',
     loadComponent: () => import('./features/profile-history/pages/history-page/history-page.component').then(m => m.HistoryPageComponent)
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('./features/settings/pages/settings-page/settings-page.component').then(m => m.SettingsPageComponent)
+  },
   // Add any other top-level company domain routes here
 ];

@@ -64,6 +64,7 @@ export class QuestionAnsweringComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.lastSubmission = null;
         this.answerForm.reset();
+        this.answerForm.enable();
         this.isTimeUp = false;
         
         this.questionService.getRandomQuestion().subscribe({
@@ -84,6 +85,7 @@ export class QuestionAnsweringComponent implements OnInit, OnDestroy {
     private startTimer() {
         this.timeLeft = QUESTION_TIME_LIMIT;
         this.isTimeUp = false;
+        this.answerForm.enable();
 
         // Clear any existing timer
         this.destroy$.next();
@@ -104,19 +106,21 @@ export class QuestionAnsweringComponent implements OnInit, OnDestroy {
     onSubmit() {
         if (this.answerForm.valid && this.currentQuestion && !this.isTimeUp) {
             this.loading = true;
+            this.answerForm.disable();
             const userAnswer = this.answerForm.get('answer')?.value;
 
             this.questionService.submitAnswer(this.currentQuestion.id, userAnswer).subscribe({
                 next: (result) => {
                     this.lastSubmission = result;
                     this.loading = false;
-                    this.destroy$.next(); // Stop the timer
+                    this.destroy$.next();
                 },
                 error: (error) => {
                     this.snackBar.open('Error submitting answer!', 'Close', {
                         duration: 3000
                     });
                     this.loading = false;
+                    this.answerForm.enable();
                 }
             });
         }
