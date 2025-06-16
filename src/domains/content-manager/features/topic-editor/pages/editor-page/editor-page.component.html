@@ -1,0 +1,438 @@
+<div class="editor-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button (click)="goBack()" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1 class="page-title">
+          <mat-icon>edit</mat-icon>
+          Topic Editor
+        </h1>
+        <p class="page-subtitle" *ngIf="subject">{{ subject.title }}</p>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="onAddTopic()">
+        <mat-icon>add</mat-icon>
+        Add Topic
+      </button>
+    </div>
+  </div>
+
+  <div class="editor-layout" *ngIf="subject">
+    <!-- Topic Sidebar -->
+    <mat-card class="topic-sidebar">
+      <mat-card-header>
+        <mat-card-title>Topics</mat-card-title>
+        <mat-card-subtitle>{{ subject.topics.length }} topics</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="topic-list">
+          <div 
+            *ngFor="let topic of subject.topics"
+            class="topic-item"
+            [class.selected]="selectedTopic?.id === topic.id"
+            (click)="onSelectTopic(topic)">
+            
+            <div class="topic-info">
+              <h4 class="topic-title">{{ topic.title }}</h4>
+              <p class="topic-meta">
+                <mat-icon class="status-icon" [style.color]="getStatusColor(topic.status)">
+                  {{ topic.status === TopicStatus.COMPLETED ? 'check_circle' : 
+                     topic.status === TopicStatus.IN_PROGRESS ? 'schedule' : 
+                     topic.status === TopicStatus.REVIEW ? 'rate_review' : 'radio_button_unchecked' }}
+                </mat-icon>
+                {{ topic.sections.length }} sections • {{ formatDuration(topic.estimatedDuration) }}
+              </p>
+            </div>
+            
+            <div class="topic-actions">
+              <button mat-icon-button (click)="onEditTopic(topic); $event.stopPropagation()" matTooltip="Edit Topic">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="onDeleteTopic(topic); $event.stopPropagation()" matTooltip="Delete Topic" color="warn">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="empty-topics" *ngIf="subject.topics.length === 0">
+          <mat-icon>topic</mat-icon>
+          <p>No topics yet. Add your first topic to get started.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Main Editor Area -->
+    <div class="main-editor" *ngIf="selectedTopic">
+      <mat-card class="topic-details">
+        <!-- Topic Edit Form -->
+        <div class="topic-edit-form" *ngIf="isEditingTopic(selectedTopic.id)">
+          <mat-card-header>
+            <mat-card-title>Edit Topic</mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <form [formGroup]="topicForm" class="edit-form">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Topic Title</mat-label>
+                  <input matInput formControlName="title">
+                </mat-form-field>
+              </div>
+              
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" rows="3"></textarea>
+                </mat-form-field>
+              </div>
+              
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Content Type</mat-label>
+                  <mat-select formControlName="contentType">
+                    <mat-option [value]="ContentType.VIDEO">Video</mat-option>
+                    <mat-option [value]="ContentType.TEXT">Text</mat-option>
+                    <mat-option [value]="ContentType.INTERACTIVE">Interactive</mat-option>
+                    <mat-option [value]="ContentType.MIXED">Mixed</mat-option>
+                    <mat-option [value]="ContentType.HANDS_ON">Hands-on</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Duration (minutes)</mat-label>
+                  <input matInput type="number" formControlName="estimatedDuration">
+                </mat-form-field>
+              </div>
+              
+              <div class="form-actions">
+                <button mat-button color="primary" (click)="onSaveTopic(selectedTopic)" [disabled]="topicForm.invalid">
+                  <mat-icon>save</mat-icon>
+                  Save Topic
+                </button>
+                <button mat-button (click)="onCancelEditTopic(selectedTopic.id)">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </div>
+
+        <!-- Topic Display -->
+        <div class="topic-display" *ngIf="!isEditingTopic(selectedTopic.id)">
+          <mat-card-header>
+            <div class="topic-header">
+              <div class="topic-title-section">
+                <mat-card-title>{{ selectedTopic.title }}</mat-card-title>
+                <mat-card-subtitle>{{ selectedTopic.description }}</mat-card-subtitle>
+              </div>
+              
+              <div class="topic-status">
+                <mat-chip [style.background-color]="getStatusColor(selectedTopic.status)">
+                  {{ selectedTopic.status | titlecase }}
+                </mat-chip>
+              </div>
+            </div>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <!-- Topic Stats -->
+            <div class="topic-stats">
+              <div class="stat-item">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ formatDuration(selectedTopic.estimatedDuration) }}</span>
+              </div>
+              <div class="stat-item">
+                <mat-icon>category</mat-icon>
+                <span>{{ selectedTopic.contentType | titlecase }}</span>
+              </div>
+              <div class="stat-item">
+                <mat-icon>list</mat-icon>
+                <span>{{ selectedTopic.sections.length }} Sections</span>
+              </div>
+              <div class="stat-item">
+                <mat-icon>trending_up</mat-icon>
+                <span>{{ getCompletionPercentage() }}% Complete</span>
+              </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-section">
+              <label>Completion Progress</label>
+              <mat-progress-bar mode="determinate" [value]="getCompletionPercentage()"></mat-progress-bar>
+            </div>
+          </mat-card-content>
+        </div>
+      </mat-card>
+
+      <!-- Sections Management -->
+      <mat-card class="sections-management">
+        <mat-card-header>
+          <div class="sections-header">
+            <div>
+              <mat-card-title>Sections</mat-card-title>
+              <mat-card-subtitle>Manage topic sections and steps</mat-card-subtitle>
+            </div>
+            <button mat-raised-button color="primary" (click)="onAddSection()">
+              <mat-icon>add</mat-icon>
+              Add Section
+            </button>
+          </div>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div cdkDropList 
+               [cdkDropListData]="selectedTopic.sections"
+               (cdkDropListDropped)="onDropSections($event)" 
+               class="sections-list">
+            
+            <mat-expansion-panel *ngFor="let section of selectedTopic.sections" 
+                                 cdkDrag 
+                                 class="section-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <div class="section-title">
+                    <mat-icon cdkDragHandle class="drag-handle-left" matTooltip="Drag to reorder">drag_indicator</mat-icon>
+                    <mat-icon [style.color]="getStatusColor(section.status)">
+                      {{ section.status === SectionStatus.COMPLETED ? 'check_circle' : 
+                         section.status === SectionStatus.IN_PROGRESS ? 'schedule' : 'radio_button_unchecked' }}
+                    </mat-icon>
+                    {{ section.title }}
+                  </div>
+                </mat-panel-title>
+                <mat-panel-description>
+                  {{ section.steps.length }} steps • {{ formatDuration(section.estimatedDuration) }}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              
+              <!-- Section Edit Form -->
+              <div class="section-edit-form" *ngIf="isEditingSection(section.id)">
+                <form [formGroup]="sectionForm" class="edit-form">
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Section Title</mat-label>
+                      <input matInput formControlName="title">
+                    </mat-form-field>
+                  </div>
+                  
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Description</mat-label>
+                      <textarea matInput formControlName="description" rows="2"></textarea>
+                    </mat-form-field>
+                  </div>
+                  
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Duration (minutes)</mat-label>
+                      <input matInput type="number" formControlName="estimatedDuration">
+                    </mat-form-field>
+                  </div>
+                  
+                  <div class="form-actions">
+                    <button mat-button color="primary" (click)="onSaveSection(section)" [disabled]="sectionForm.invalid">
+                      <mat-icon>save</mat-icon>
+                      Save
+                    </button>
+                    <button mat-button (click)="onCancelEditSection(section.id)">
+                      <mat-icon>cancel</mat-icon>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+              
+              <!-- Section Content -->
+              <div class="section-content" *ngIf="!isEditingSection(section.id)">
+                <div class="section-info">
+                  <p class="section-description">{{ section.description }}</p>
+                  
+                  <div class="section-actions">
+                    <button mat-button (click)="onEditSection(section)">
+                      <mat-icon>edit</mat-icon>
+                      Edit Section
+                    </button>
+                    <button mat-button (click)="onAddStep(section)" color="primary">
+                      <mat-icon>add</mat-icon>
+                      Add Step
+                    </button>
+                    <button mat-button (click)="onDeleteSection(section)" color="warn">
+                      <mat-icon>delete</mat-icon>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Steps List -->
+                <div class="steps-container" *ngIf="section.steps.length > 0">
+                  <h4>Steps</h4>
+                  
+                  <div cdkDropList 
+                       [cdkDropListData]="section.steps"
+                       (cdkDropListDropped)="onDropSteps($event, section)" 
+                       class="steps-list">
+                    
+                    <div *ngFor="let step of section.steps" 
+                         cdkDrag 
+                         class="step-item">
+                      
+                      <!-- Step Display -->
+                                              <div class="step-content" *ngIf="!isEditingStep(step.id)">
+                          <mat-icon cdkDragHandle class="drag-handle-left" matTooltip="Drag to reorder">drag_indicator</mat-icon>
+                        <div class="step-info">
+                          <div class="step-header">
+                            <h5 class="step-title">
+                              <mat-icon [style.color]="getStatusColor(step.status)" class="step-status-icon">
+                                {{ step.status === StepStatus.COMPLETED ? 'check_circle' : 
+                                   step.status === StepStatus.IN_PROGRESS ? 'schedule' : 'radio_button_unchecked' }}
+                              </mat-icon>
+                              {{ step.title }}
+                              <mat-icon *ngIf="step.interactive" class="interactive-badge" matTooltip="Interactive Step">
+                                touch_app
+                              </mat-icon>
+                            </h5>
+                            <div class="step-meta">
+                              <span class="step-duration">{{ step.estimatedDuration }}min</span>
+                              <span class="step-type" *ngIf="step.mediaType">{{ step.mediaType | titlecase }}</span>
+                            </div>
+                          </div>
+                          <p class="step-description">{{ step.content }}</p>
+                        </div>
+                        
+                        <div class="step-actions">
+                          <button mat-icon-button (click)="onEditStep(step)" matTooltip="Edit Step">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button mat-icon-button (click)="onDeleteStep(section, step)" matTooltip="Delete Step" color="warn">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <!-- Step Edit Form -->
+                      <div class="step-edit-form" *ngIf="isEditingStep(step.id)">
+                        <form [formGroup]="stepForm" class="edit-form">
+                          <div class="form-row">
+                            <mat-form-field appearance="outline" class="full-width">
+                              <mat-label>Step Title</mat-label>
+                              <input matInput formControlName="title">
+                            </mat-form-field>
+                          </div>
+                          
+                          <div class="form-row">
+                            <mat-form-field appearance="outline" class="full-width">
+                              <mat-label>Description</mat-label>
+                              <textarea matInput formControlName="description" rows="2"></textarea>
+                            </mat-form-field>
+                          </div>
+                          
+                          <div class="form-row">
+                            <mat-form-field appearance="outline" class="full-width">
+                              <mat-label>Content</mat-label>
+                              <textarea matInput formControlName="content" rows="4"></textarea>
+                            </mat-form-field>
+                          </div>
+                          
+                          <div class="form-row">
+                            <mat-form-field appearance="outline" class="half-width">
+                              <mat-label>Duration (minutes)</mat-label>
+                              <input matInput type="number" formControlName="estimatedDuration">
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="outline" class="half-width">
+                              <mat-label>Media Type</mat-label>
+                              <mat-select formControlName="mediaType">
+                                <mat-option [value]="MediaType.VIDEO">Video</mat-option>
+                                <mat-option [value]="MediaType.AUDIO">Audio</mat-option>
+                                <mat-option [value]="MediaType.IMAGE">Image</mat-option>
+                                <mat-option [value]="MediaType.DOCUMENT">Document</mat-option>
+                                <mat-option [value]="MediaType.PRESENTATION">Presentation</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+                          
+                          <div class="form-row">
+                            <mat-slide-toggle formControlName="interactive">
+                              Interactive Step
+                            </mat-slide-toggle>
+                          </div>
+                          
+                          <div class="form-actions">
+                            <button mat-button color="primary" (click)="onSaveStep(step)" [disabled]="stepForm.invalid">
+                              <mat-icon>save</mat-icon>
+                              Save
+                            </button>
+                            <button mat-button (click)="onCancelEditStep(step.id)">
+                              <mat-icon>cancel</mat-icon>
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Empty Steps State -->
+                <div class="empty-steps" *ngIf="section.steps.length === 0">
+                  <mat-icon>assignment</mat-icon>
+                  <p>No steps in this section. Add your first step to get started.</p>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </div>
+          
+          <!-- Empty Sections State -->
+          <div class="empty-sections" *ngIf="selectedTopic.sections.length === 0">
+            <mat-icon>list</mat-icon>
+            <h3>No sections yet</h3>
+            <p>Add your first section to start building topic content.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-topic-state" *ngIf="!selectedTopic && subject.topics.length > 0">
+      <mat-icon>touch_app</mat-icon>
+      <h3>Select a Topic</h3>
+      <p>Choose a topic from the sidebar to start editing.</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-card>
+      <mat-card-content>
+        <div class="loading-content">
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          <p>Loading subject data...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- No Subject State -->
+  <div class="no-subject-state" *ngIf="!subject && !loading">
+    <mat-card>
+      <mat-card-content>
+        <div class="empty-state">
+          <mat-icon>error_outline</mat-icon>
+          <h3>Subject Not Found</h3>
+          <p>The requested subject could not be loaded.</p>
+          <button mat-raised-button color="primary" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Go Back
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div> 

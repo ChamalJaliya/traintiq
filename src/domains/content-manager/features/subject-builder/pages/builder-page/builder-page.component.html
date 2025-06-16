@@ -1,0 +1,446 @@
+<div class="builder-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button (click)="goBack()" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1 class="page-title">
+          <mat-icon>build</mat-icon>
+          Subject Builder
+        </h1>
+        <p class="page-subtitle" *ngIf="plan">{{ plan.title }}</p>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="toggleAIForm()">
+        <mat-icon>auto_awesome</mat-icon>
+        AI Generate Content
+      </button>
+    </div>
+  </div>
+
+  <!-- AI Generation Form -->
+  <mat-card *ngIf="showAIForm" class="ai-form-card">
+    <mat-card-header>
+      <mat-card-title>AI Content Generator</mat-card-title>
+      <mat-card-subtitle>Let AI suggest comprehensive sections and steps for your training topic</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="aiGenerationForm" (ngSubmit)="onGenerateContent()">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Topic</mat-label>
+            <input matInput formControlName="topic" placeholder="e.g., React Hooks, Machine Learning Basics">
+            <mat-hint>What specific topic would you like to create training content for?</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Subject Area</mat-label>
+            <input matInput formControlName="subjectArea" placeholder="e.g., Frontend Development, Data Science">
+            <mat-hint>The broader field or domain this topic belongs to</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Target Audience</mat-label>
+            <input matInput formControlName="targetAudience" placeholder="e.g., Junior Developers, Students">
+            <mat-hint>Who is this training content designed for?</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Difficulty Level</mat-label>
+            <mat-select formControlName="difficulty">
+              <mat-option [value]="DifficultyLevel.BEGINNER">
+                <span class="difficulty-option">
+                  <mat-icon>school</mat-icon>
+                  Beginner - New to the topic
+                </span>
+              </mat-option>
+              <mat-option [value]="DifficultyLevel.INTERMEDIATE">
+                <span class="difficulty-option">
+                  <mat-icon>trending_up</mat-icon>
+                  Intermediate - Some experience
+                </span>
+              </mat-option>
+              <mat-option [value]="DifficultyLevel.ADVANCED">
+                <span class="difficulty-option">
+                  <mat-icon>star</mat-icon>
+                  Advanced - Experienced learners
+                </span>
+              </mat-option>
+              <mat-option [value]="DifficultyLevel.EXPERT">
+                <span class="difficulty-option">
+                  <mat-icon>emoji_events</mat-icon>
+                  Expert - Professional level
+                </span>
+              </mat-option>
+            </mat-select>
+            <mat-hint>Choose the appropriate skill level for your audience</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <div class="form-info">
+            <mat-icon>info</mat-icon>
+            <span>AI will generate structured content with sections, steps, and estimated durations</span>
+          </div>
+          <div class="action-buttons">
+            <button type="button" mat-button (click)="onCancelAI()">Cancel</button>
+            <button type="submit" mat-raised-button color="primary" [disabled]="!aiGenerationForm.valid || generatingContent">
+              <mat-icon *ngIf="generatingContent">hourglass_empty</mat-icon>
+              <mat-icon *ngIf="!generatingContent">auto_awesome</mat-icon>
+              {{ generatingContent ? 'Generating...' : 'Generate Content' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Generated Content Preview -->
+  <mat-card *ngIf="generatedContent" class="generated-content-card">
+    <mat-card-header>
+      <mat-card-title>Generated Content Preview</mat-card-title>
+      <mat-card-subtitle>Review and accept the AI-generated sections and steps</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="generated-sections">
+        <mat-expansion-panel *ngFor="let section of generatedContent.sections">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ section.title }}</mat-panel-title>
+            <mat-panel-description>{{ formatDuration(section.estimatedDuration) }}</mat-panel-description>
+          </mat-expansion-panel-header>
+          
+          <p>{{ section.description }}</p>
+          
+          <div class="generated-steps">
+            <div *ngFor="let step of section.steps" class="step-item">
+              <mat-icon>{{ step.interactive ? 'quiz' : 'play_circle' }}</mat-icon>
+              <div class="step-content">
+                <h4>{{ step.title }}</h4>
+                <p>{{ step.content }}</p>
+                <small>{{ formatDuration(step.estimatedDuration) }}</small>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </div>
+      
+      <div class="generated-actions">
+        <button mat-button (click)="generatedContent = null">Regenerate</button>
+        <button mat-raised-button color="primary" (click)="onAcceptGeneratedContent()">
+          <mat-icon>check</mat-icon>
+          Accept & Create Subject
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Enhanced Subjects List with Sections and Steps -->
+  <mat-card class="subjects-section">
+    <mat-card-header>
+      <mat-card-title>Training Subjects</mat-card-title>
+      <mat-card-subtitle>Manage your training content structure with sections and steps</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="subjects-list">
+        <div
+          *ngFor="let subject of subjects" 
+          cdkDrag
+          class="subject-item"
+          [class.dragging]="false">
+          
+          <div class="subject-header">
+            <mat-icon cdkDragHandle class="drag-handle-left-subject" matTooltip="Drag to reorder">drag_indicator</mat-icon>
+            <div class="subject-info">
+              <h3 class="subject-title">{{ subject.title }}</h3>
+              <p class="subject-description">{{ subject.description }}</p>
+              
+              <div class="subject-meta">
+                <mat-chip [style.background-color]="getStatusColor(subject.status)">
+                  {{ subject.status | titlecase }}
+                </mat-chip>
+                
+                <span class="duration">
+                  <mat-icon>schedule</mat-icon>
+                  {{ formatDuration(subject.estimatedDuration) }}
+                </span>
+                
+                <span class="topics-count">
+                  <mat-icon>topic</mat-icon>
+                  {{ subject.topics.length }} Topics
+                </span>
+              </div>
+            </div>
+            
+            <div class="subject-actions">
+              <button mat-icon-button 
+                      (click)="onEditSubject(subject)"
+                      matTooltip="Edit Subject">
+                <mat-icon>edit</mat-icon>
+              </button>
+              
+              <button mat-icon-button 
+                      (click)="onDeleteSubject(subject)"
+                      matTooltip="Delete Subject"
+                      color="warn">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Topics List with Drag and Drop -->
+          <div class="topics-container">
+            <div class="topics-header">
+              <h4>Topics</h4>
+              <button mat-button 
+                      color="primary" 
+                      [routerLink]="['/content-manager/topic-editor', subject.id]"
+                      matTooltip="Edit Topics">
+                <mat-icon>edit</mat-icon>
+                Edit Topics
+              </button>
+            </div>
+            
+            <div cdkDropList 
+                 [cdkDropListData]="subject.topics"
+                 (cdkDropListDropped)="onDropTopic($event, subject)" 
+                 class="topics-list">
+              
+              <div *ngFor="let topic of subject.topics" 
+                   cdkDrag 
+                   class="topic-item-draggable">
+                
+                <div class="topic-header-wrapper">
+                  <mat-icon cdkDragHandle class="drag-handle-left-topic" matTooltip="Drag to reorder">drag_indicator</mat-icon>
+                  <mat-expansion-panel class="topic-panel">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        <mat-icon class="topic-icon">topic</mat-icon>
+                        {{ topic.title }}
+                      </mat-panel-title>
+                      <mat-panel-description>
+                        {{ topic.sections.length }} sections • {{ formatDuration(topic.estimatedDuration) }}
+                      </mat-panel-description>
+                    </mat-expansion-panel-header>
+            
+            <!-- Sections List -->
+            <div class="sections-container">
+              <div class="sections-header">
+                <h4>Sections</h4>
+                <button mat-mini-fab 
+                        color="primary" 
+                        (click)="onAddSection(topic)"
+                        matTooltip="Add Section">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+              
+              <div cdkDropList 
+                   [cdkDropListData]="topic.sections"
+                   (cdkDropListDropped)="onDropSection($event, topic)" 
+                   class="sections-list">
+                
+                <div *ngFor="let section of topic.sections" 
+                     cdkDrag 
+                     class="section-item">
+                  
+                  <!-- Section Header -->
+                  <div class="section-header" *ngIf="!isEditingSection(section.id)">
+                    <mat-icon cdkDragHandle class="drag-handle-left" matTooltip="Drag to reorder">drag_indicator</mat-icon>
+                    <div class="section-info">
+                      <h5 class="section-title">
+                        <mat-icon [style.color]="getSectionStatusColor(section.status)">
+                          {{ section.status === SectionStatus.COMPLETED ? 'check_circle' : 
+                             section.status === SectionStatus.IN_PROGRESS ? 'schedule' : 'radio_button_unchecked' }}
+                        </mat-icon>
+                        {{ section.title }}
+                      </h5>
+                      <p class="section-description">{{ section.description }}</p>
+                      <span class="section-meta">{{ section.steps.length }} steps • {{ formatDuration(section.estimatedDuration) }}</span>
+                    </div>
+                    
+                    <div class="section-actions">
+                      <button mat-icon-button 
+                              (click)="onEditSection(section)"
+                              matTooltip="Edit Section">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      
+                      <button mat-icon-button 
+                              (click)="onAddStep(section)"
+                              matTooltip="Add Step"
+                              color="primary">
+                        <mat-icon>add</mat-icon>
+                      </button>
+                      
+                      <button mat-icon-button 
+                              (click)="onDeleteSection(topic, section)"
+                              matTooltip="Delete Section"
+                              color="warn">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Section Edit Form -->
+                  <div class="section-edit-form" *ngIf="isEditingSection(section.id)">
+                    <form [formGroup]="sectionEditForm" class="edit-form">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Section Title</mat-label>
+                        <input matInput formControlName="title">
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput formControlName="description" rows="2"></textarea>
+                      </mat-form-field>
+                      
+                      <div class="form-actions">
+                        <button mat-button 
+                                color="primary" 
+                                (click)="onSaveSection(section)"
+                                [disabled]="sectionEditForm.invalid">
+                          <mat-icon>save</mat-icon>
+                          Save
+                        </button>
+                        
+                        <button mat-button 
+                                (click)="onCancelEditSection(section.id)">
+                          <mat-icon>cancel</mat-icon>
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                  
+                  <!-- Steps List -->
+                  <div class="steps-container" *ngIf="section.steps.length > 0">
+                    <div cdkDropList 
+                         [cdkDropListData]="section.steps"
+                         (cdkDropListDropped)="onDropStep($event, section)" 
+                         class="steps-list">
+                      
+                      <div *ngFor="let step of section.steps" 
+                           cdkDrag 
+                           class="step-item">
+                        
+                        <!-- Step Display -->
+                        <div class="step-content" *ngIf="!isEditingStep(step.id)">
+                          <mat-icon cdkDragHandle class="drag-handle-left-step" matTooltip="Drag to reorder">drag_indicator</mat-icon>
+                          <div class="step-info">
+                            <h6 class="step-title">
+                              <mat-icon [style.color]="getStepStatusColor(step.status)" class="step-status-icon">
+                                {{ step.status === StepStatus.COMPLETED ? 'check_circle' : 
+                                   step.status === StepStatus.IN_PROGRESS ? 'schedule' : 'radio_button_unchecked' }}
+                              </mat-icon>
+                              {{ step.title }}
+                              <mat-icon *ngIf="step.interactive" class="interactive-badge" matTooltip="Interactive Step">
+                                touch_app
+                              </mat-icon>
+                            </h6>
+                            <p class="step-description">{{ step.content }}</p>
+                            <span class="step-duration">{{ step.estimatedDuration }}min</span>
+                          </div>
+                          
+                          <div class="step-actions">
+                            <button mat-icon-button 
+                                    (click)="onEditStep(step)"
+                                    matTooltip="Edit Step">
+                              <mat-icon>edit</mat-icon>
+                            </button>
+                            
+                            <button mat-icon-button 
+                                    (click)="onDeleteStep(section, step)"
+                                    matTooltip="Delete Step"
+                                    color="warn">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <!-- Step Edit Form -->
+                        <div class="step-edit-form" *ngIf="isEditingStep(step.id)">
+                          <form [formGroup]="stepEditForm" class="edit-form">
+                            <mat-form-field appearance="outline" class="full-width">
+                              <mat-label>Step Title</mat-label>
+                              <input matInput formControlName="title">
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="outline" class="full-width">
+                              <mat-label>Content</mat-label>
+                              <textarea matInput formControlName="content" rows="3"></textarea>
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="outline">
+                              <mat-label>Duration (minutes)</mat-label>
+                              <input matInput type="number" formControlName="estimatedDuration">
+                            </mat-form-field>
+                            
+                            <div class="form-actions">
+                              <button mat-button 
+                                      color="primary" 
+                                      (click)="onSaveStep(step)"
+                                      [disabled]="stepEditForm.invalid">
+                                <mat-icon>save</mat-icon>
+                                Save
+                              </button>
+                              
+                              <button mat-button 
+                                      (click)="onCancelEditStep(step.id)">
+                                <mat-icon>cancel</mat-icon>
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Empty Steps State -->
+                  <div class="empty-steps" *ngIf="section.steps.length === 0">
+                    <p>No steps yet. Click the + button to add your first step.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+                                </mat-expansion-panel>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Prerequisites -->
+          <div class="prerequisites" *ngIf="subject.prerequisites.length > 0">
+            <strong>Prerequisites:</strong>
+            <mat-chip-set>
+              <mat-chip *ngFor="let prerequisite of subject.prerequisites">
+                {{ prerequisite }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+          
+          <!-- Learning Objectives -->
+          <div class="learning-objectives" *ngIf="subject.learningObjectives.length > 0">
+            <strong>Learning Objectives:</strong>
+            <ul>
+              <li *ngFor="let objective of subject.learningObjectives">{{ objective }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="subjects.length === 0">
+        <mat-icon>school</mat-icon>
+        <h3>No subjects created yet</h3>
+        <p>Use the AI generator to create your first training subject</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div> 

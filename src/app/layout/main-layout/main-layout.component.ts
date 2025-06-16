@@ -34,6 +34,32 @@ import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.comp
           </div>
         </div>
         <mat-nav-list>
+          <!-- Content Manager Section -->
+          <div class="nav-section">
+            <div class="nav-section-header">
+              <mat-icon>video_library</mat-icon>
+              <span>Content Manager</span>
+            </div>
+            <a mat-list-item routerLink="/content-manager/plans" routerLinkActive="active" class="nav-item">
+              <mat-icon>school</mat-icon>
+              <span>Training Plans</span>
+            </a>
+            <a mat-list-item routerLink="/content-manager/subject-builder/1" routerLinkActive="active" class="nav-item">
+              <mat-icon>build</mat-icon>
+              <span>Subject Builder</span>
+            </a>
+            <a mat-list-item routerLink="/content-manager/topic-editor/1" routerLinkActive="active" class="nav-item">
+              <mat-icon>edit</mat-icon>
+              <span>Topic Editor</span>
+            </a>
+            <a mat-list-item routerLink="/content-manager/content-viewer/1" routerLinkActive="active" class="nav-item">
+              <mat-icon>visibility</mat-icon>
+              <span>Content Viewer</span>
+            </a>
+          </div>
+
+          <mat-divider class="nav-divider"></mat-divider>
+
           <!-- Question Grading Section -->
           <div class="nav-section">
             <div class="nav-section-header">
@@ -135,13 +161,15 @@ import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.comp
           
           .mat-drawer-inner-container {
             background: #1a237e;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: 100vh;
           }
         }
 
         .mdc-list {
           background: #1a237e;
-          padding: 0;
+          padding: 16px 0;
 
           .mdc-list-item {
             padding: 0;
@@ -198,6 +226,54 @@ import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.comp
     // Sidenav styles
     .app-sidenav {
       width: 250px;
+      
+      .nav-section {
+        margin-bottom: 12px;
+        
+        .nav-section-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px 24px 12px;
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.8px;
+          position: relative;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            left: 24px;
+            right: 24px;
+            height: 1px;
+            background: linear-gradient(90deg, 
+              rgba(100, 181, 246, 0.3) 0%, 
+              transparent 100%);
+          }
+          
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: rgba(100, 181, 246, 0.8);
+          }
+        }
+      }
+      
+      .nav-divider {
+        background: linear-gradient(90deg, 
+          transparent 0%, 
+          rgba(100, 181, 246, 0.3) 20%, 
+          rgba(100, 181, 246, 0.3) 80%, 
+          transparent 100%);
+        margin: 20px 16px;
+        height: 1px;
+        border: none;
+        opacity: 0.6;
+      }
       border: none;
 
       .sidenav-header {
@@ -248,7 +324,52 @@ import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.comp
 
       ::ng-deep {
         .mat-drawer-inner-container {
-          overflow: hidden;  // Prevent unwanted scrollbars
+          overflow-x: hidden;
+          overflow-y: auto;
+          height: 100vh;
+          scroll-behavior: smooth;
+          
+          // Modern custom scrollbar styling
+          &::-webkit-scrollbar {
+            width: 8px;
+          }
+          
+          &::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, 
+              rgba(100, 181, 246, 0.8) 0%, 
+              rgba(63, 81, 181, 0.8) 100%);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+            transition: all 0.3s ease;
+            
+            &:hover {
+              background: linear-gradient(180deg, 
+                rgba(100, 181, 246, 1) 0%, 
+                rgba(63, 81, 181, 1) 100%);
+              border-radius: 6px;
+              width: 10px;
+            }
+            
+            &:active {
+              background: linear-gradient(180deg, 
+                rgba(33, 150, 243, 1) 0%, 
+                rgba(48, 63, 159, 1) 100%);
+            }
+          }
+          
+          &::-webkit-scrollbar-corner {
+            background: transparent;
+          }
+          
+          // Firefox scrollbar styling
+          scrollbar-width: thin;
+          scrollbar-color: rgba(100, 181, 246, 0.8) rgba(255, 255, 255, 0.05);
         }
 
         .mat-nav-list {

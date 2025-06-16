@@ -1,0 +1,312 @@
+<div class="viewer-container" *ngIf="!loading">
+  <!-- Navigation Header -->
+  <div class="viewer-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button mat-icon-button (click)="goBack()" class="back-btn" matTooltip="Back to Plans">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        
+        <div class="topic-info" *ngIf="topic">
+          <h1 class="topic-title">{{ topic.title }}</h1>
+          <p class="topic-subtitle">{{ topic.description }}</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="progress-info">
+          <span class="progress-text">{{ progress.completedSteps.size }} of {{ progress.totalSteps }} completed</span>
+          <mat-progress-bar 
+            [value]="progress.progressPercentage" 
+            mode="determinate"
+            class="topic-progress">
+          </mat-progress-bar>
+        </div>
+        <button mat-stroked-button (click)="takeNotes()" matTooltip="Take Notes">
+          <mat-icon>note_add</mat-icon>
+          Notes
+        </button>
+        <button mat-stroked-button (click)="bookmarkStep()" matTooltip="Bookmark Current Step">
+          <mat-icon>bookmark_add</mat-icon>
+          Bookmark
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <div class="viewer-layout" *ngIf="topic">
+    <!-- Left Sidebar - Navigation -->
+    <div class="content-sidebar">
+      <mat-card class="navigation-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>list</mat-icon>
+            Course Content
+          </mat-card-title>
+          <mat-card-subtitle>Step {{ progress.currentStep + 1 }} of {{ progress.totalSteps }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="sections-nav">
+            <mat-accordion multi="false">
+              <mat-expansion-panel 
+                *ngFor="let section of topic.sections; let sectionIndex = index"
+                [expanded]="sectionIndex === progress.currentSection"
+                class="section-nav-panel">
+                
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <div class="section-nav-header">
+                      <mat-icon [style.color]="getSectionCompletionCount(section) === section.steps.length ? '#4caf50' : '#64748b'">
+                        {{ getSectionCompletionCount(section) === section.steps.length ? 'check_circle' : 'radio_button_unchecked' }}
+                      </mat-icon>
+                      <span>{{ section.title }}</span>
+                      <mat-chip-set>
+                        <mat-chip>{{ getSectionCompletionCount(section) }}/{{ section.steps.length }}</mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                
+                <div class="steps-nav">
+                  <div 
+                    *ngFor="let step of section.steps; let stepIndex = index"
+                    class="step-nav-item"
+                    [class.active]="currentStep?.id === step.id"
+                    [class.completed]="isStepCompleted(step.id)"
+                    (click)="goToSection(sectionIndex); goToStep(stepIndex)">
+                    
+                    <div class="step-nav-content">
+                      <mat-icon [style.color]="getStepStatusColor(step)">
+                        {{ getStepStatusIcon(step) }}
+                      </mat-icon>
+                      
+                      <div class="step-nav-info">
+                        <span class="step-title">{{ step.title }}</span>
+                        <div class="step-meta">
+                          <span class="step-duration">{{ step.estimatedDuration }}min</span>
+                          <mat-icon class="media-icon">{{ getMediaTypeIcon(step.mediaType) }}</mat-icon>
+                          <mat-icon *ngIf="step.interactive" class="interactive-icon" matTooltip="Interactive Content">star</mat-icon>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Current Step Display -->
+      <mat-card class="step-content-card" *ngIf="currentStep">
+        <mat-card-header>
+          <div class="step-header-content">
+            <div class="step-title-section">
+              <mat-card-title>{{ currentStep.title }}</mat-card-title>
+              <mat-card-subtitle>{{ currentStep.description }}</mat-card-subtitle>
+            </div>
+            
+            <div class="step-badges">
+              <mat-chip-set>
+                <mat-chip [style.background-color]="'#dbeafe'" [style.color]="'#1e40af'">
+                  {{ formatTime(currentStep.estimatedDuration * 60) }}
+                </mat-chip>
+                <mat-chip [style.background-color]="'#f3e8ff'" [style.color]="'#7c3aed'">
+                  {{ currentStep.mediaType || 'Video' }}
+                </mat-chip>
+                <mat-chip 
+                  *ngIf="currentStep.interactive"
+                  [style.background-color]="'#fef3c7'" 
+                  [style.color]="'#d97706'">
+                  <mat-icon>star</mat-icon>
+                  Interactive
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- Media Player Simulation -->
+          <div class="media-player">
+            <div class="video-placeholder">
+              <div class="video-content">
+                <div class="video-overlay" *ngIf="!isPlaying">
+                  <button mat-fab color="primary" (click)="togglePlayback()" class="play-button">
+                    <mat-icon>play_arrow</mat-icon>
+                  </button>
+                </div>
+                
+                <div class="video-info" *ngIf="isPlaying">
+                  <div class="video-title">{{ currentStep.title }}</div>
+                  <div class="video-time">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Player Controls -->
+            <div class="player-controls">
+              <div class="timeline-controls">
+                <mat-slider
+                  min="0"
+                  [max]="duration"
+                  class="timeline-slider">
+                  <input matSliderThumb [value]="currentTime" (input)="onTimeSliderChange($event)">
+                </mat-slider>
+              </div>
+              
+              <div class="control-buttons">
+                <div class="left-controls">
+                  <button mat-icon-button (click)="togglePlayback()" matTooltip="{{ isPlaying ? 'Pause' : 'Play' }}">
+                    <mat-icon>{{ isPlaying ? 'pause' : 'play_arrow' }}</mat-icon>
+                  </button>
+                  
+                  <div class="time-display">
+                    <span>{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
+                  </div>
+                </div>
+                
+                <div class="right-controls">
+                  <div class="volume-control">
+                    <mat-icon>volume_up</mat-icon>
+                    <mat-slider
+                      min="0"
+                      max="100"
+                      class="volume-slider">
+                      <input matSliderThumb [value]="volume">
+                    </mat-slider>
+                  </div>
+                  
+                  <button mat-button [matMenuTriggerFor]="speedMenu" class="speed-btn">
+                    {{ playbackSpeed }}x
+                  </button>
+                  <mat-menu #speedMenu="matMenu">
+                    <button mat-menu-item (click)="setPlaybackSpeed(0.5)">0.5x</button>
+                    <button mat-menu-item (click)="setPlaybackSpeed(0.75)">0.75x</button>
+                    <button mat-menu-item (click)="setPlaybackSpeed(1)">1x</button>
+                    <button mat-menu-item (click)="setPlaybackSpeed(1.25)">1.25x</button>
+                    <button mat-menu-item (click)="setPlaybackSpeed(1.5)">1.5x</button>
+                    <button mat-menu-item (click)="setPlaybackSpeed(2)">2x</button>
+                  </mat-menu>
+                  
+                  <button mat-icon-button matTooltip="Fullscreen">
+                    <mat-icon>fullscreen</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step Content -->
+          <div class="step-description">
+            <h3>About this step</h3>
+            <p>{{ currentStep.description }}</p>
+            
+            <!-- Interactive Content -->
+            <div class="interactive-section" *ngIf="currentStep.interactive">
+              <mat-card class="interactive-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>star</mat-icon>
+                    Interactive Activity
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>This step includes interactive content. Complete the activity to proceed.</p>
+                  <button mat-raised-button color="accent" (click)="handleInteractiveContent()">
+                    Start Activity
+                  </button>
+                </mat-card-content>
+              </mat-card>
+            </div>
+            
+            <!-- Resources -->
+            <div class="resources-section" *ngIf="currentStep">
+              <h4>Resources</h4>
+              <div class="resource-buttons">
+                <button mat-stroked-button (click)="downloadResource(currentStep)">
+                  <mat-icon>download</mat-icon>
+                  Download Materials
+                </button>
+                <button mat-stroked-button>
+                  <mat-icon>quiz</mat-icon>
+                  Practice Quiz
+                </button>
+                <button mat-stroked-button>
+                  <mat-icon>code</mat-icon>
+                  Code Examples
+                </button>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <!-- Step Actions -->
+        <mat-card-actions class="step-actions">
+          <div class="navigation-controls">
+            <button 
+              mat-stroked-button 
+              (click)="goToPreviousStep()"
+              [disabled]="progress.currentSection === 0 && progress.currentStep === 0">
+              <mat-icon>chevron_left</mat-icon>
+              Previous
+            </button>
+            
+            <div class="completion-controls">
+              <button 
+                mat-button 
+                color="accent"
+                (click)="markStepComplete()"
+                [disabled]="isStepCompleted(currentStep.id)">
+                <mat-icon>check</mat-icon>
+                {{ isStepCompleted(currentStep.id) ? 'Completed' : 'Mark Complete' }}
+              </button>
+            </div>
+            
+            <button 
+              mat-raised-button 
+              color="primary"
+              (click)="goToNextStep()">
+              Next
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-state" *ngIf="loading">
+  <mat-card>
+    <mat-card-content>
+      <div class="loading-content">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <h3>Loading Content...</h3>
+        <p>Please wait while we prepare your learning experience.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Empty State -->
+<div class="empty-state" *ngIf="!loading && !topic">
+  <mat-card>
+    <mat-card-content>
+      <div class="empty-content">
+        <mat-icon class="empty-icon">video_library</mat-icon>
+        <h3>No Content Available</h3>
+        <p>The requested topic could not be found or has no content to display.</p>
+        <button mat-raised-button color="primary" (click)="goBack()">
+          Back to Plans
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div> 

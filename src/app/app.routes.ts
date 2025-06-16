@@ -19,8 +19,12 @@ export const routes: Routes = [
         loadChildren: () => import('../domains/question-grading/question-grading.routes').then(m => m.QUESTION_GRADING_ROUTES)
       },
       {
+        path: 'content-manager',
+        loadChildren: () => import('../domains/content-manager/content-manager.routes').then(m => m.CONTENT_MANAGER_ROUTES)
+      },
+      {
         path: '',
-        redirectTo: '/company',
+        redirectTo: '/content-manager',
         pathMatch: 'full'
       }
     ]
