@@ -57,6 +57,7 @@ export class OrganizationChartPageComponent implements OnInit, OnDestroy {
   isLoading = true;
   viewMode: 'tree' | 'compact' | 'branch' = 'tree';
   showLevels = true;
+  isFullscreen = false;
   
   // Zoom and Pan properties
   zoomLevel = 1;
@@ -669,6 +670,36 @@ export class OrganizationChartPageComponent implements OnInit, OnDestroy {
 
   toggleLevels(): void {
     this.showLevels = !this.showLevels;
+  }
+
+  toggleFullscreen(): void {
+    this.isFullscreen = !this.isFullscreen;
+    this.onPanelFullscreenChange();
+  }
+
+  private onPanelFullscreenChange(): void {
+    // Recalculate layout when panel size changes
+    setTimeout(() => {
+      if (this.viewMode === 'branch') {
+        this.calculateTreeLayout();
+        this.generateConnections();
+      }
+      this.fitToScreen();
+    }, 100);
+  }
+
+  onFullscreenOverlayClick(event: MouseEvent): void {
+    // Check if click is on the close button area (top-right corner)
+    const target = event.target as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+    
+    // Close button is in top-right corner (40x40px area)
+    if (this.isFullscreen && clickX >= rect.width - 50 && clickY <= 50) {
+      this.isFullscreen = false;
+      this.onPanelFullscreenChange();
+    }
   }
 
   getNodeLevel(node: OrganizationNode): string {

@@ -95,6 +95,22 @@
           width: 18px;
           height: 18px;
         }
+
+        // Special styling for fullscreen button
+        &[aria-describedby*="fullscreen"] {
+          border: 2px solid transparent;
+          transition: all 0.3s ease;
+
+          &.mat-stroked-button[color="primary"] {
+            background: rgba(63, 81, 181, 0.1);
+            border-color: #3f51b5;
+            animation: pulse 2s infinite;
+          }
+
+          &:hover {
+            transform: scale(1.05);
+          }
+        }
       }
     }
   }
@@ -853,6 +869,78 @@
   // Add fade-in animation to cards
   .employee-card {
     animation: fadeInUp 0.6s ease-out;
+  }
+
+  // Panel fullscreen mode styles
+  .organization-tree.panel-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    backdrop-filter: none;
+    
+    // Hide legend in fullscreen for more space
+    .tree-legend {
+      display: none;
+    }
+    
+    // Maximize viewport dimensions
+    .tree-compact-wrapper {
+      height: calc(100vh - 40px);
+      border-radius: 12px;
+    }
+    
+    .interactive-tree-viewport {
+      height: calc(100vh - 40px);
+      border-radius: 12px;
+    }
+    
+    // Add close button overlay
+    &::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      background: rgba(244, 67, 54, 0.9);
+      border-radius: 50%;
+      z-index: 10001;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+      backdrop-filter: blur(8px);
+    }
+    
+    &::after {
+      content: '✕';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 10002;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+    
+    &:hover::before {
+      background: rgba(244, 67, 54, 1);
+      transform: scale(1.1);
+    }
   }
 
   .empty-state {
