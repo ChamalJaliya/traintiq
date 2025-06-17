@@ -23,6 +23,10 @@ export const routes: Routes = [
         loadChildren: () => import('../domains/content-manager/content-manager.routes').then(m => m.CONTENT_MANAGER_ROUTES)
       },
       {
+        path: 'test-tour',
+        loadComponent: () => import('./test-tour.component').then(m => m.TestTourComponent)
+      },
+      {
         path: '',
         redirectTo: '/content-manager',
         pathMatch: 'full'

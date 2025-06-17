@@ -1,0 +1,127 @@
+<div class="tour-launcher-container">
+  <!-- Floating Action Button -->
+  <button 
+    mat-fab 
+    extended
+    color="primary"
+    class="tour-launcher-fab"
+    [class.pulse]="shouldShowPulse()"
+    (click)="toggleMenu()"
+    [attr.aria-label]="isMenuOpen() ? 'Close tour menu' : 'Open tour menu'">
+    <mat-icon>{{ isMenuOpen() ? 'close' : 'tour' }}</mat-icon>
+    <span>{{ isMenuOpen() ? 'Close' : 'Take Tour' }}</span>
+  </button>
+
+  <!-- Tour Menu -->
+  <div class="tour-menu" [class.open]="isMenuOpen()" [class.has-tours]="availableTours().length > 0">
+    <mat-card class="tour-menu-card">
+      <mat-card-header>
+        <div mat-card-avatar class="tour-menu-avatar">
+          <mat-icon>school</mat-icon>
+        </div>
+        <mat-card-title>Interactive Tours</mat-card-title>
+        <mat-card-subtitle>Choose a guided tour to get started</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Welcome Message -->
+        @if (shouldShowWelcome()) {
+          <div class="welcome-message">
+            <div class="welcome-icon">
+              <mat-icon>waving_hand</mat-icon>
+            </div>
+            <h3>Welcome to Traintiq!</h3>
+            <p>Ready to explore? Take a guided tour to discover all the amazing features.</p>
+          </div>
+        }
+
+        <!-- Tour List -->
+        <div class="tour-list">
+          @for (tour of availableTours(); track tour.id) {
+            <div class="tour-item" [class.completed]="tourService.isTourCompleted(tour.id)">
+              <div class="tour-item-header">
+                <div class="tour-icon">
+                  <mat-icon>{{ getTourIcon(tour) }}</mat-icon>
+                </div>
+                <div class="tour-info">
+                  <h4>{{ tour.name }}</h4>
+                  <p>{{ tour.description }}</p>
+                  <div class="tour-meta">
+                    <mat-chip-listbox>
+                      <mat-chip-option 
+                        [color]="tourService.isTourCompleted(tour.id) ? 'accent' : 'primary'"
+                        [selected]="true">
+                        @if (tourService.isTourCompleted(tour.id)) {
+                          <mat-icon>check_circle</mat-icon>
+                          Completed
+                        } @else {
+                          <mat-icon>play_circle</mat-icon>
+                          {{ tour.steps.length }} steps
+                        }
+                      </mat-chip-option>
+                    </mat-chip-listbox>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="tour-actions">
+                @if (tourService.isTourCompleted(tour.id)) {
+                  <button 
+                    mat-stroked-button 
+                    color="accent"
+                    (click)="resetTour(tour.id)"
+                    class="tour-reset-btn">
+                    <mat-icon>refresh</mat-icon>
+                    <span>Retake</span>
+                  </button>
+                } @else {
+                  <button 
+                    mat-raised-button 
+                    color="primary"
+                    (click)="startTour(tour.id)"
+                    class="tour-start-btn">
+                    <mat-icon>play_arrow</mat-icon>
+                    <span>Start Tour</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- No Tours Message -->
+        @if (availableTours().length === 0) {
+          <div class="no-tours-message">
+            <mat-icon>info</mat-icon>
+            <p>No tours available at the moment. Check back later!</p>
+          </div>
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button 
+          mat-button 
+          color="primary" 
+          (click)="toggleMenu()">
+          <mat-icon>close</mat-icon>
+          <span>Close Menu</span>
+        </button>
+        
+        @if (hasCompletedTours()) {
+          <button 
+            mat-button 
+            color="warn" 
+            (click)="resetAllTours()">
+            <mat-icon>restore</mat-icon>
+            <span>Reset All Tours</span>
+          </button>
+        }
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Backdrop -->
+  @if (isMenuOpen()) {
+    <div class="tour-launcher-backdrop" (click)="closeMenu()"></div>
+  }
+</div> 

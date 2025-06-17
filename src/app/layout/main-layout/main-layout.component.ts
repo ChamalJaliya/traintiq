@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.component';
+import { TourComponent } from '../../shared/components/tour/tour.component';
+import { TourLauncherComponent } from '../../shared/components/tour-launcher/tour-launcher.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -23,7 +25,9 @@ import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.comp
     MatButtonModule,
     MatTooltipModule,
     MatDividerModule,
-    ChatBotComponent
+    ChatBotComponent,
+    TourComponent,
+    TourLauncherComponent
   ],
   template: `
     <mat-drawer-container class="app-container">
@@ -146,6 +150,10 @@ import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.comp
         
         <!-- Chat Bot Component -->
         <app-chat-bot></app-chat-bot>
+        
+        <!-- Tour Components -->
+        <app-tour></app-tour>
+        <app-tour-launcher></app-tour-launcher>
       </mat-drawer-content>
     </mat-drawer-container>
   `,

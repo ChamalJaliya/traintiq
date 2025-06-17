@@ -1,0 +1,102 @@
+<div class="tour-overlay" [class.backdrop]="currentStep()?.backdrop">
+  @if (tourService.isActive() && !tourService.isCompleted()) {
+    <div class="tour-card" [style.top.px]="cardPosition().top" [style.left.px]="cardPosition().left">
+      <mat-card class="tour-step-card">
+        <mat-card-header>
+          <div mat-card-avatar class="tour-avatar">
+            <mat-icon>{{ getStepIcon() }}</mat-icon>
+          </div>
+          <mat-card-title>{{ currentStep()?.title }}</mat-card-title>
+          <mat-card-subtitle>
+            Step {{ tourService.currentStepIndex() + 1 }} of {{ totalSteps() }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="tour-content">
+            {{ currentStep()?.content }}
+          </div>
+          
+          <div class="tour-progress">
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="tourService.progress()">
+            </mat-progress-bar>
+            <span class="progress-text">
+              {{ Math.round(tourService.progress()) }}% Complete
+            </span>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <!-- Skip Button -->
+          @if (currentStep()?.showSkip) {
+            <button 
+              mat-stroked-button 
+              color="warn" 
+              (click)="skipTour()"
+              class="tour-skip-btn">
+              <mat-icon>close</mat-icon>
+              <span>Skip Tour</span>
+            </button>
+          }
+          
+          <!-- Previous Button -->
+          @if (currentStep()?.showPrevious && !tourService.isFirstStep()) {
+            <button 
+              mat-stroked-button 
+              (click)="previousStep()"
+              class="tour-prev-btn">
+              <mat-icon>arrow_back</mat-icon>
+              <span>Previous</span>
+            </button>
+          }
+          
+          <!-- Next/Finish Button -->
+          @if (currentStep()?.showNext) {
+            @if (tourService.isLastStep()) {
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="nextStep()"
+                class="tour-finish-btn">
+                <mat-icon>check_circle</mat-icon>
+                <span>Finish Tour</span>
+              </button>
+            } @else {
+              <button 
+                mat-raised-button 
+                color="primary" 
+                (click)="nextStep()"
+                class="tour-next-btn">
+                <span>Next</span>
+                <mat-icon>navigate_next</mat-icon>
+              </button>
+            }
+          }
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  }
+  
+  <!-- Completion Message -->
+  @if (tourService.isCompleted()) {
+    <div class="tour-completion">
+      <mat-card class="completion-card">
+        <mat-card-content>
+          <div class="completion-content">
+            <mat-icon class="completion-icon">celebration</mat-icon>
+            <h2>Tour Completed! 🎉</h2>
+            <p>Great job! You've completed the {{ currentTour()?.name }}.</p>
+            <mat-chip-listbox>
+              <mat-chip-option color="accent" selected>
+                <mat-icon>school</mat-icon>
+                Tour Completed
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div> 
