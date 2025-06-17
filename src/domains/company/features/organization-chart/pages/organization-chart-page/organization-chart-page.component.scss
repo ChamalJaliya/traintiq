@@ -1,0 +1,799 @@
+// Professional Organization Chart with Traintiq Blue Theme
+.organization-chart-container {
+  padding: 24px;
+  background: #f8f9fa;
+  min-height: calc(100vh - 64px);
+
+  // Clean Header Design
+  .chart-header {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    margin-bottom: 24px;
+    border-top: 3px solid #3f51b5;
+
+    .header-content {
+      margin-bottom: 16px;
+
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1a237e;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+          color: #3f51b5;
+        }
+      }
+
+      .page-subtitle {
+        color: #666;
+        margin: 0;
+        font-size: 14px;
+      }
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      .view-options,
+      .toggle-options {
+        display: flex;
+        gap: 8px;
+      }
+
+      button {
+        height: 36px;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 6px;
+
+        &[color="primary"] {
+          background-color: #3f51b5;
+          color: white;
+        }
+
+        mat-icon {
+          margin-right: 4px;
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+
+  // Loading State
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    mat-spinner {
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #666;
+      font-size: 14px;
+      margin: 0;
+    }
+  }
+
+  // Tree Legend
+  .tree-legend {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 3px solid #2196f3;
+
+    h3 {
+      margin: 0 0 12px 0;
+      color: #1a237e;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        background: #f5f5f5;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+
+        .level-indicator {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          border: 2px solid white;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+
+  // Clean Organization Tree
+  .organization-tree {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+
+    .tree-container {
+      padding: 24px;
+    }
+
+    // Tree Node Layout
+    .tree-node-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+
+      // Level Badge
+      .level-badge {
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 600;
+        z-index: 10;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      // Root Indicator
+      .root-indicator {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff9800;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        z-index: 10;
+        box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
+
+        mat-icon {
+          font-size: 12px;
+          width: 12px;
+          height: 12px;
+        }
+      }
+    }
+
+    // Employee Card Container
+    .employee-card-container {
+      position: relative;
+      
+      &.cdk-drop-list-dragging {
+        background: rgba(63, 81, 181, 0.05);
+        border: 2px dashed #3f51b5;
+        border-radius: 8px;
+        padding: 4px;
+      }
+    }
+
+    // Clean Employee Card
+    .employee-card {
+      position: relative;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+      border-left: 4px solid #e0e0e0;
+      background: white;
+      max-width: 400px;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
+
+      &.root-card {
+        border-left-color: #ff9800;
+        background: linear-gradient(135deg, #fff3e0, #ffffff);
+      }
+
+      &.manager-card {
+        border-left-color: #3f51b5;
+        border-left-width: 4px;
+      }
+
+      &.child-card {
+        max-width: 360px;
+        border-left-color: #2196f3;
+        border-left-width: 3px;
+        margin: 8px 0;
+      }
+
+      &.nested-card {
+        max-width: 320px;
+        border-left-color: #00bcd4;
+        border-left-width: 3px;
+        margin: 6px 0;
+
+        &.compact {
+          max-width: 300px;
+        }
+      }
+
+      // Drag Handle
+      .drag-handle {
+        position: absolute;
+        top: 50%;
+        left: -12px;
+        transform: translateY(-50%);
+        background: #3f51b5;
+        color: white;
+        width: 20px;
+        height: 32px;
+        border-radius: 0 6px 6px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        opacity: 0;
+        transition: all 0.2s ease;
+        z-index: 5;
+
+        &:hover {
+          opacity: 1;
+          width: 24px;
+        }
+
+        &.compact {
+          width: 18px;
+          height: 28px;
+        }
+
+        &:active {
+          cursor: grabbing;
+        }
+
+        mat-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+      }
+
+      &:hover .drag-handle {
+        opacity: 0.7;
+      }
+
+      &.cdk-drag-dragging {
+        transform: rotate(3deg) scale(1.02);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+
+        .drag-handle {
+          opacity: 1;
+        }
+      }
+
+      // Employee Avatar
+      .employee-avatar {
+        position: relative;
+        
+        .avatar-image {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid white;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .default-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #3f51b5, #2196f3);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          border: 2px solid white;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        // Level Ring
+        .level-ring {
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          border-radius: 50%;
+          border: 2px solid;
+          opacity: 0.6;
+
+          &.compact {
+            border-width: 1px;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+          }
+        }
+
+        &.compact {
+          .avatar-image,
+          .default-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+          }
+        }
+      }
+
+      // Employee Name and Badges
+      .employee-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a237e;
+        margin-bottom: 4px;
+
+        &.compact {
+          font-size: 14px;
+        }
+
+        .employee-badges {
+          display: flex;
+          gap: 4px;
+          margin-top: 4px;
+
+          .status-chip {
+            font-size: 10px;
+            min-height: 20px;
+            font-weight: 500;
+            border-radius: 10px;
+          }
+
+          .root-chip {
+            background: #ff9800 !important;
+            color: white !important;
+            font-weight: 600;
+          }
+        }
+      }
+
+      // Employee Details
+      .employee-details {
+        margin-top: 6px;
+
+        &.compact {
+          margin-top: 4px;
+        }
+
+        .position-level {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 4px;
+
+          .position {
+            font-weight: 500;
+            color: #333;
+            font-size: 13px;
+          }
+
+          .level-text {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: rgba(63, 81, 181, 0.1);
+            color: #3f51b5;
+            border-radius: 8px;
+            font-weight: 500;
+          }
+        }
+
+        .department {
+          font-weight: 500;
+          font-size: 12px;
+          margin-bottom: 4px;
+        }
+
+        .hierarchy-info {
+          .reports-count {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+
+            mat-icon {
+              font-size: 14px;
+              width: 14px;
+              height: 14px;
+              color: #4caf50;
+            }
+          }
+        }
+      }
+
+      // Card Actions
+      .card-actions {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+
+        button {
+          width: 28px;
+          height: 28px;
+          min-width: unset;
+          
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+        }
+      }
+
+      &:hover .card-actions {
+        opacity: 1;
+      }
+
+      // Skills Section
+      .skills-section {
+        margin-top: 8px;
+
+        .skills-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 3px;
+
+          .skill-chip {
+            font-size: 9px;
+            min-height: 18px;
+            background: rgba(63, 81, 181, 0.1);
+            color: #3f51b5;
+            border-radius: 9px;
+            font-weight: 500;
+            padding: 0 6px;
+          }
+
+          .more-skills {
+            font-size: 9px;
+            min-height: 18px;
+            background: #ff9800;
+            color: white;
+            border-radius: 9px;
+            font-weight: 500;
+            padding: 0 6px;
+          }
+        }
+      }
+
+      // Expand Section
+      .expand-section {
+        margin-top: 8px;
+        text-align: center;
+
+        .expand-button {
+          min-width: 100px;
+          height: 28px;
+          border-radius: 14px;
+          font-size: 11px;
+          font-weight: 500;
+
+          &.compact {
+            min-width: 80px;
+            height: 24px;
+            font-size: 10px;
+          }
+
+          &[color="primary"] {
+            background: #3f51b5;
+            color: white;
+          }
+
+          &[color="warn"] {
+            background: #f44336;
+            color: white;
+          }
+
+          mat-icon {
+            margin-right: 3px;
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+          }
+        }
+      }
+
+      // Card Header and Content Padding
+      .mat-mdc-card-header {
+        padding: 16px 16px 12px 16px;
+      }
+
+      .mat-mdc-card-content {
+        padding: 0 16px 16px 16px;
+      }
+    }
+
+    // Tree Connector Lines
+    .tree-connector {
+      position: absolute;
+      width: 1px;
+      background: linear-gradient(to bottom, #3f51b5, transparent);
+      z-index: 1;
+      opacity: 0.4;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -3px;
+        width: 7px;
+        height: 1px;
+        background: #3f51b5;
+        border-radius: 1px;
+      }
+    }
+
+    // Child Nodes
+    .child-nodes {
+      position: relative;
+      margin-top: 12px;
+
+      .children-container {
+        &.cdk-drop-list-dragging {
+          background: rgba(33, 150, 243, 0.05);
+          border: 2px dashed #2196f3;
+          border-radius: 8px;
+          padding: 8px;
+          margin: 4px 0;
+        }
+      }
+
+      .child-node-wrapper {
+        position: relative;
+        margin-bottom: 12px;
+
+        .child-level-badge {
+          position: absolute;
+          top: -4px;
+          left: -4px;
+          color: white;
+          padding: 2px 4px;
+          border-radius: 6px;
+          font-size: 9px;
+          font-weight: 500;
+          z-index: 10;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        // Child connector line
+        &::before {
+          content: '';
+          position: absolute;
+          top: 20px;
+          left: -16px;
+          width: 12px;
+          height: 1px;
+          background: linear-gradient(to right, #2196f3, transparent);
+          z-index: 1;
+        }
+      }
+
+      // Nested Children
+      .nested-children {
+        margin-top: 8px;
+        margin-left: 16px;
+        border-left: 1px dashed rgba(0, 188, 212, 0.3);
+        padding-left: 12px;
+
+        .nested-container {
+          &.cdk-drop-list-dragging {
+            background: rgba(0, 188, 212, 0.05);
+            border: 2px dashed #00bcd4;
+            border-radius: 6px;
+            padding: 6px;
+          }
+        }
+
+        .nested-child-wrapper {
+          position: relative;
+          margin-bottom: 8px;
+
+          &::before {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: -16px;
+            width: 10px;
+            height: 1px;
+            background: linear-gradient(to right, #00bcd4, transparent);
+            z-index: 1;
+          }
+
+          .employee-card {
+            .compact-header {
+              padding: 12px 12px 8px 12px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Empty State
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    .empty-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      color: #1a237e;
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    p {
+      color: #666;
+      margin: 0 0 20px 0;
+      font-size: 14px;
+      max-width: 300px;
+    }
+
+    button {
+      min-width: 140px;
+      height: 36px;
+      border-radius: 18px;
+      font-weight: 500;
+    }
+  }
+
+  // Menu Actions
+  .delete-action {
+    color: #f44336 !important;
+
+    mat-icon {
+      color: #f44336;
+    }
+  }
+}
+
+// Level Colors
+.organization-chart-container .tree-node-wrapper .level-badge {
+  &[style*="rgb(26, 35, 126)"] { background-color: #1a237e !important; } // CEO
+  &[style*="rgb(63, 81, 181)"] { background-color: #3f51b5 !important; } // C-Level
+  &[style*="rgb(33, 150, 243)"] { background-color: #2196f3 !important; } // Director
+  &[style*="rgb(0, 188, 212)"] { background-color: #00bcd4 !important; } // Manager
+  &[style*="rgb(76, 175, 80)"] { background-color: #4caf50 !important; } // Senior
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .organization-chart-container {
+    padding: 16px;
+
+    .chart-header {
+      padding: 16px;
+      
+      .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+
+        .view-options,
+        .toggle-options {
+          justify-content: center;
+        }
+
+        button {
+          min-width: auto;
+          flex: 1;
+          max-width: 120px;
+        }
+      }
+    }
+
+    .organization-tree {
+      .tree-container {
+        padding: 16px;
+      }
+
+      .tree-node-wrapper {
+        margin-left: 0 !important;
+
+        .employee-card {
+          max-width: 100%;
+          margin-bottom: 8px;
+
+          &.child-card,
+          &.nested-card {
+            max-width: 100%;
+          }
+        }
+      }
+
+      .child-node-wrapper {
+        margin-left: 8px !important;
+      }
+
+      .nested-child-wrapper {
+        margin-left: 6px !important;
+      }
+    }
+  }
+}
+
+// CDK Drag Drop Styles
+.cdk-drag {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list {
+  min-height: 40px;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+  border: 1px dashed #ccc;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.cdk-drag-preview {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 8px;
+  transform: rotate(3deg);
+} 

@@ -1,0 +1,341 @@
+<div class="directory-container">
+  <!-- Header Section -->
+  <div class="directory-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>people</mat-icon>
+        Organization Directory
+      </h1>
+      <p class="page-subtitle">Find and connect with team members across the organization</p>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="search-filters">
+      <mat-form-field class="search-field" appearance="outline">
+        <mat-label>Search employees...</mat-label>
+        <input matInput 
+               #searchInput
+               [value]="searchQuery" 
+               (input)="onSearch(searchInput.value)"
+               placeholder="Name, position, department, or email">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field" appearance="outline">
+        <mat-label>Department</mat-label>
+        <mat-select [value]="selectedDepartment" (selectionChange)="onDepartmentFilter($event.value)">
+          <mat-option value="">All Departments</mat-option>
+          <mat-option *ngFor="let dept of departments" [value]="dept.name">
+            {{ dept.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field" appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [value]="selectedStatus" (selectionChange)="onStatusFilter($event.value)">
+          <mat-option value="">All Status</mat-option>
+          <mat-option value="active">Active</mat-option>
+          <mat-option value="inactive">Inactive</mat-option>
+          <mat-option value="on-leave">On Leave</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+
+    <!-- View Toggle and Stats -->
+    <div class="header-actions">
+      <div class="results-count">
+        <mat-chip class="count-chip">{{ filteredEmployees.length }} Employee{{ filteredEmployees.length !== 1 ? 's' : '' }}</mat-chip>
+      </div>
+      
+      <mat-button-toggle-group [value]="viewMode" (change)="viewMode = $event.value" class="view-toggle">
+        <mat-button-toggle value="grid" matTooltip="Grid View">
+          <mat-icon>grid_view</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="list" matTooltip="List View">
+          <mat-icon>view_list</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading employee directory...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading" class="directory-content">
+    <div class="employee-list" [class.list-view]="viewMode === 'list'" [class.grid-view]="viewMode === 'grid'">
+      
+      <!-- Grid View -->
+      <div *ngIf="viewMode === 'grid'" class="grid-container">
+        <mat-card *ngFor="let employee of filteredEmployees" 
+                  class="employee-card grid-card"
+                  (click)="onViewEmployee(employee)"
+                  [class.selected]="selectedEmployee?.id === employee.id">
+          <div class="card-header">
+            <div class="employee-avatar">
+              <img *ngIf="employee.avatar" 
+                   [src]="employee.avatar" 
+                   [alt]="employee.name"
+                   class="avatar-image">
+              <mat-icon *ngIf="!employee.avatar" class="default-avatar">person</mat-icon>
+            </div>
+            
+            <div class="status-indicator" 
+                 [style.background-color]="getStatusColor(employee.status)"
+                 [matTooltip]="employee.status | titlecase">
+            </div>
+
+            <button mat-icon-button class="actions-btn" [matMenuTriggerFor]="cardMenu" (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #cardMenu="matMenu">
+              <button mat-menu-item (click)="onViewEmployee(employee)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Details</span>
+              </button>
+              <button mat-menu-item (click)="onEditEmployee(employee)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="onDeleteEmployee(employee)" class="delete-action">
+                <mat-icon>delete</mat-icon>
+                <span>Remove</span>
+              </button>
+            </mat-menu>
+          </div>
+
+          <mat-card-content class="card-content">
+            <h3 class="employee-name">{{ employee.name }}</h3>
+            <p class="employee-position">{{ employee.position }}</p>
+            <div class="employee-department" [style.color]="getDepartmentColor(employee.department)">
+              {{ employee.department }}
+            </div>
+            <div class="employee-contact">
+              <span class="email">{{ employee.email }}</span>
+              <span *ngIf="employee.location" class="location">
+                <mat-icon>location_on</mat-icon>
+                {{ employee.location }}
+              </span>
+            </div>
+            
+            <div class="employee-type">
+              <mat-chip [style.background-color]="getEmployeeTypeColor(employee.employeeType)" 
+                        [style.color]="'white'" 
+                        class="type-chip">
+                {{ employee.employeeType | titlecase }}
+              </mat-chip>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- List View -->
+      <div *ngIf="viewMode === 'list'" class="list-container">
+        <mat-card *ngFor="let employee of filteredEmployees" 
+                  class="employee-card list-card"
+                  (click)="onViewEmployee(employee)"
+                  [class.selected]="selectedEmployee?.id === employee.id">
+          <div class="list-card-content">
+            <div class="employee-info">
+              <div class="employee-avatar">
+                <img *ngIf="employee.avatar" 
+                     [src]="employee.avatar" 
+                     [alt]="employee.name"
+                     class="avatar-image">
+                <mat-icon *ngIf="!employee.avatar" class="default-avatar">person</mat-icon>
+              </div>
+              
+              <div class="employee-details">
+                <div class="name-status">
+                  <h3 class="employee-name">{{ employee.name }}</h3>
+                  <mat-chip class="status-chip" 
+                            [style.background-color]="getStatusColor(employee.status)"
+                            [style.color]="'white'">
+                    {{ employee.status | titlecase }}
+                  </mat-chip>
+                </div>
+                <p class="employee-position">{{ employee.position }}</p>
+                <div class="employee-meta">
+                  <span class="department" [style.color]="getDepartmentColor(employee.department)">
+                    {{ employee.department }}
+                  </span>
+                  <span class="separator">•</span>
+                  <span class="employee-type">{{ employee.employeeType | titlecase }}</span>
+                  <span class="separator">•</span>
+                  <span class="join-date">{{ getYearsOfService(employee.joinDate) }} years</span>
+                </div>
+                <div class="contact-info">
+                  <span class="email">{{ employee.email }}</span>
+                  <span *ngIf="employee.phone" class="phone">{{ employee.phone }}</span>
+                  <span *ngIf="employee.location" class="location">
+                    <mat-icon>location_on</mat-icon>
+                    {{ employee.location }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="skills-section" *ngIf="employee.skills && employee.skills.length > 0">
+              <div class="skills-label">Skills:</div>
+              <div class="skills-container">
+                <mat-chip *ngFor="let skill of employee.skills.slice(0, 3)" class="skill-chip">
+                  {{ skill }}
+                </mat-chip>
+                <mat-chip *ngIf="employee.skills.length > 3" class="more-skills-chip">
+                  +{{ employee.skills.length - 3 }} more
+                </mat-chip>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button mat-icon-button [matMenuTriggerFor]="listMenu" (click)="$event.stopPropagation()">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #listMenu="matMenu">
+                <button mat-menu-item (click)="onViewEmployee(employee)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View Details</span>
+                </button>
+                <button mat-menu-item (click)="onEditEmployee(employee)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="onDeleteEmployee(employee)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  <span>Remove</span>
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Employee Detail Panel -->
+    <div *ngIf="selectedEmployee" class="employee-detail-panel">
+      <mat-card class="detail-card">
+        <mat-card-header class="detail-header">
+          <div class="employee-avatar" mat-card-avatar>
+            <img *ngIf="selectedEmployee.avatar" 
+                 [src]="selectedEmployee.avatar" 
+                 [alt]="selectedEmployee.name"
+                 class="avatar-image">
+            <mat-icon *ngIf="!selectedEmployee.avatar" class="default-avatar">person</mat-icon>
+          </div>
+          
+          <mat-card-title class="detail-name">
+            {{ selectedEmployee.name }}
+            <mat-chip class="status-chip" 
+                      [style.background-color]="getStatusColor(selectedEmployee.status)"
+                      [style.color]="'white'">
+              {{ selectedEmployee.status | titlecase }}
+            </mat-chip>
+          </mat-card-title>
+          
+          <mat-card-subtitle class="detail-position">
+            {{ selectedEmployee.position }}
+            <div class="department" [style.color]="getDepartmentColor(selectedEmployee.department)">
+              {{ selectedEmployee.department }}
+            </div>
+          </mat-card-subtitle>
+
+          <button mat-icon-button class="close-btn" (click)="closeEmployeeDetail()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+
+        <mat-card-content class="detail-content">
+          <!-- Contact Information -->
+          <div class="info-section">
+            <h4 class="section-title">Contact Information</h4>
+            <div class="info-item">
+              <mat-icon>email</mat-icon>
+              <span>{{ selectedEmployee.email }}</span>
+            </div>
+            <div class="info-item" *ngIf="selectedEmployee.phone">
+              <mat-icon>phone</mat-icon>
+              <span>{{ selectedEmployee.phone }}</span>
+            </div>
+            <div class="info-item" *ngIf="selectedEmployee.location">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ selectedEmployee.location }}</span>
+            </div>
+          </div>
+
+          <!-- Employment Details -->
+          <div class="info-section">
+            <h4 class="section-title">Employment Details</h4>
+            <div class="info-item">
+              <mat-icon>work</mat-icon>
+              <span>{{ selectedEmployee.employeeType | titlecase }}</span>
+            </div>
+            <div class="info-item">
+              <mat-icon>event</mat-icon>
+              <span>Joined {{ formatJoinDate(selectedEmployee.joinDate) }}</span>
+            </div>
+            <div class="info-item">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ getYearsOfService(selectedEmployee.joinDate) }} years of service</span>
+            </div>
+          </div>
+
+          <!-- Skills -->
+          <div class="info-section" *ngIf="selectedEmployee.skills && selectedEmployee.skills.length > 0">
+            <h4 class="section-title">Skills & Expertise</h4>
+            <div class="skills-container">
+              <mat-chip *ngFor="let skill of selectedEmployee.skills" class="skill-chip">
+                {{ skill }}
+              </mat-chip>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="info-section" *ngIf="selectedEmployee.bio">
+            <h4 class="section-title">About</h4>
+            <p class="bio-text">{{ selectedEmployee.bio }}</p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="detail-actions">
+            <button mat-raised-button color="primary" (click)="onEditEmployee(selectedEmployee)">
+              <mat-icon>edit</mat-icon>
+              Edit Profile
+            </button>
+            <button mat-stroked-button>
+              <mat-icon>email</mat-icon>
+              Send Message
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredEmployees.length === 0" class="empty-state">
+    <mat-icon class="empty-icon">search_off</mat-icon>
+    <h2>No Employees Found</h2>
+    <p *ngIf="searchQuery || selectedDepartment || selectedStatus">
+      Try adjusting your search criteria or clearing filters to see more results.
+    </p>
+    <p *ngIf="!searchQuery && !selectedDepartment && !selectedStatus">
+      No employees are currently available in the directory.
+    </p>
+    <button mat-raised-button color="primary" (click)="clearFilters()" 
+            *ngIf="searchQuery || selectedDepartment || selectedStatus">
+      <mat-icon>clear</mat-icon>
+      Clear All Filters
+    </button>
+  </div>
+</div> 

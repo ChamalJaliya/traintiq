@@ -21,6 +21,14 @@ export const COMPANY_ROUTES: Routes = [
     loadComponent: () => import('./features/profile-history/pages/history-page/history-page.component').then(m => m.HistoryPageComponent)
   },
   {
+    path: 'organization-chart',
+    loadComponent: () => import('./features/organization-chart/pages/organization-chart-page/organization-chart-page.component').then(m => m.OrganizationChartPageComponent)
+  },
+  {
+    path: 'organization-directory',
+    loadComponent: () => import('./features/organization-directory/pages/directory-page/directory-page.component').then(m => m.DirectoryPageComponent)
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./features/settings/pages/settings-page/settings-page.component').then(m => m.SettingsPageComponent)
   },

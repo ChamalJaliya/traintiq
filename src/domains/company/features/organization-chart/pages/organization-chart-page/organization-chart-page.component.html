@@ -1,0 +1,400 @@
+<div class="organization-chart-container">
+  <!-- Enhanced Header -->
+  <div class="chart-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>account_tree</mat-icon>
+        Organization Chart
+      </h1>
+      <p class="page-subtitle">Interactive organizational hierarchy with drag-and-drop functionality</p>
+    </div>
+    
+    <!-- View Controls -->
+    <div class="header-controls">
+      <div class="view-options">
+        <button mat-stroked-button 
+                [color]="viewMode === 'tree' ? 'primary' : 'basic'"
+                (click)="toggleViewMode()">
+          <mat-icon>account_tree</mat-icon>
+          Tree View
+        </button>
+        <button mat-stroked-button 
+                [color]="viewMode === 'compact' ? 'primary' : 'basic'"
+                (click)="toggleViewMode()">
+          <mat-icon>view_compact</mat-icon>
+          Compact View
+        </button>
+      </div>
+      
+      <div class="toggle-options">
+        <button mat-stroked-button 
+                [color]="showLevels ? 'primary' : 'basic'"
+                (click)="toggleLevels()">
+          <mat-icon>layers</mat-icon>
+          Show Levels
+        </button>
+        <button mat-raised-button color="primary" (click)="refreshChart()">
+          <mat-icon>refresh</mat-icon>
+          Refresh
+        </button>
+        <button mat-raised-button color="accent" (click)="onAddDirectReport(null)">
+          <mat-icon>person_add</mat-icon>
+          Add Employee
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading organization chart...</p>
+  </div>
+
+  <!-- Enhanced Organization Tree -->
+  <div *ngIf="!isLoading" class="organization-tree" [class.compact-mode]="viewMode === 'compact'">
+    
+    <!-- Tree Legend -->
+    <div *ngIf="showLevels" class="tree-legend">
+      <h3>Organizational Levels</h3>
+      <div class="legend-items">
+        <div class="legend-item" *ngFor="let level of [0,1,2,3,4]; let i = index">
+          <div class="level-indicator" [style.background-color]="getLevelColor(i)"></div>
+          <span>{{ getLevelLabel(i) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Tree Container -->
+    <div class="tree-container">
+      <ng-container *ngFor="let node of organizationTree">
+        <div class="tree-node-wrapper" 
+             [style.margin-left.px]="viewMode === 'tree' ? node.level * 60 : 0"
+             [attr.data-level]="node.level">
+          
+          <!-- Level Indicator -->
+          <div *ngIf="showLevels" class="level-badge" [style.background-color]="getLevelColor(node.level)">
+            Level {{ node.level }}
+          </div>
+          
+          <!-- Root Indicator -->
+          <div *ngIf="isRootNode(node)" class="root-indicator">
+            <mat-icon>star</mat-icon>
+            ROOT
+          </div>
+
+          <!-- Employee Card with Drag and Drop -->
+          <div class="employee-card-container" 
+               cdkDropList
+               [cdkDropListData]="[node.employee]"
+               (cdkDropListDropped)="onDrop($event, node.employee.id)">
+            
+            <mat-card class="employee-card" 
+                      [class.root-card]="isRootNode(node)"
+                      [class.manager-card]="node.children.length > 0"
+                      [class.employee-card-level]="true"
+                      [style.border-left-color]="getLevelColor(node.level)"
+                      cdkDrag 
+                      [cdkDragData]="node.employee">
+              
+              <!-- Drag Handle -->
+              <div class="drag-handle" cdkDragHandle>
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+
+              <mat-card-header>
+                <div class="employee-avatar" mat-card-avatar>
+                  <img *ngIf="node.employee.avatar" 
+                       [src]="node.employee.avatar" 
+                       [alt]="node.employee.name"
+                       class="avatar-image">
+                  <mat-icon *ngIf="!node.employee.avatar" class="default-avatar">person</mat-icon>
+                  
+                  <!-- Level Ring -->
+                  <div class="level-ring" [style.border-color]="getLevelColor(node.level)"></div>
+                </div>
+                
+                <mat-card-title class="employee-name">
+                  {{ node.employee.name }}
+                  <div class="employee-badges">
+                    <mat-chip class="status-chip" 
+                              [style.background-color]="getStatusColor(node.employee.status)"
+                              [style.color]="'white'">
+                      {{ node.employee.status | titlecase }}
+                    </mat-chip>
+                    <mat-chip *ngIf="isRootNode(node)" class="root-chip">
+                      ROOT
+                    </mat-chip>
+                  </div>
+                </mat-card-title>
+                
+                <mat-card-subtitle class="employee-details">
+                  <div class="position-level">
+                    <span class="position">{{ node.employee.position }}</span>
+                    <span class="level-text">{{ getNodeLevel(node) }}</span>
+                  </div>
+                  <div class="department" [style.color]="getDepartmentColor(node.employee.department)">
+                    {{ node.employee.department }}
+                  </div>
+                  <div class="hierarchy-info">
+                    <span class="reports-count" *ngIf="node.children.length > 0">
+                      <mat-icon>groups</mat-icon>
+                      {{ node.children.length }} Direct Report{{ node.children.length !== 1 ? 's' : '' }}
+                    </span>
+                  </div>
+                </mat-card-subtitle>
+
+                <!-- Actions Menu -->
+                <div class="card-actions">
+                  <button mat-icon-button [matMenuTriggerFor]="actionsMenu" matTooltip="Actions">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #actionsMenu="matMenu">
+                    <button mat-menu-item (click)="onViewEmployee(node.employee)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>View Details</span>
+                    </button>
+                    <button mat-menu-item (click)="onEditEmployee(node.employee)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Edit</span>
+                    </button>
+                    <button mat-menu-item (click)="onAddDirectReport(node.employee)">
+                      <mat-icon>person_add</mat-icon>
+                      <span>Add Direct Report</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item (click)="onDeleteEmployee(node.employee)" class="delete-action">
+                      <mat-icon>delete</mat-icon>
+                      <span>Remove</span>
+                    </button>
+                  </mat-menu>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content class="employee-content">
+                <!-- Skills -->
+                <div *ngIf="node.employee.skills && node.employee.skills.length > 0" class="skills-section">
+                  <div class="skills-container">
+                    <mat-chip *ngFor="let skill of node.employee.skills.slice(0, 3)" class="skill-chip">
+                      {{ skill }}
+                    </mat-chip>
+                    <mat-chip *ngIf="node.employee.skills.length > 3" class="more-skills">
+                      +{{ node.employee.skills.length - 3 }}
+                    </mat-chip>
+                  </div>
+                </div>
+
+                <!-- Expand/Collapse Button -->
+                <div *ngIf="node.children.length > 0" class="expand-section">
+                  <button mat-stroked-button 
+                          (click)="toggleNode(node)"
+                          [color]="node.expanded ? 'warn' : 'primary'"
+                          class="expand-button">
+                    <mat-icon>{{ node.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    {{ node.expanded ? 'Collapse' : 'Expand' }} Team ({{ node.children.length }})
+                  </button>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- Tree Connector Lines -->
+          <div *ngIf="node.children.length > 0 && node.expanded" class="tree-connector" 
+               [ngStyle]="getTreeConnectorStyle(node)"></div>
+
+          <!-- Child Nodes -->
+          <div *ngIf="node.children.length > 0 && node.expanded" class="child-nodes">
+            <div class="children-container" 
+                 cdkDropList
+                 [cdkDropListData]="getChildEmployees(node)"
+                 (cdkDropListDropped)="onDrop($event, node.employee.id)">
+              
+              <ng-container *ngFor="let childNode of node.children">
+                <div class="child-node-wrapper" 
+                     [style.margin-left.px]="viewMode === 'tree' ? 40 : 0">
+                  
+                  <!-- Child Level Indicator -->
+                  <div *ngIf="showLevels" class="child-level-badge" [style.background-color]="getLevelColor(childNode.level)">
+                    {{ getNodeLevel(childNode) }}
+                  </div>
+
+                  <!-- Child Employee Card -->
+                  <mat-card class="employee-card child-card" 
+                            [style.border-left-color]="getLevelColor(childNode.level)"
+                            cdkDrag 
+                            [cdkDragData]="childNode.employee">
+                    
+                    <!-- Child Drag Handle -->
+                    <div class="drag-handle" cdkDragHandle>
+                      <mat-icon>drag_indicator</mat-icon>
+                    </div>
+
+                    <mat-card-header>
+                      <div class="employee-avatar" mat-card-avatar>
+                        <img *ngIf="childNode.employee.avatar" 
+                             [src]="childNode.employee.avatar" 
+                             [alt]="childNode.employee.name"
+                             class="avatar-image">
+                        <mat-icon *ngIf="!childNode.employee.avatar" class="default-avatar">person</mat-icon>
+                        <div class="level-ring" [style.border-color]="getLevelColor(childNode.level)"></div>
+                      </div>
+                      
+                      <mat-card-title class="employee-name">
+                        {{ childNode.employee.name }}
+                        <mat-chip class="status-chip" 
+                                  [style.background-color]="getStatusColor(childNode.employee.status)"
+                                  [style.color]="'white'">
+                          {{ childNode.employee.status | titlecase }}
+                        </mat-chip>
+                      </mat-card-title>
+                      
+                      <mat-card-subtitle class="employee-details">
+                        <div class="position-level">
+                          <span class="position">{{ childNode.employee.position }}</span>
+                          <span class="level-text">{{ getNodeLevel(childNode) }}</span>
+                        </div>
+                        <div class="department" [style.color]="getDepartmentColor(childNode.employee.department)">
+                          {{ childNode.employee.department }}
+                        </div>
+                      </mat-card-subtitle>
+
+                      <!-- Child Actions Menu -->
+                      <div class="card-actions">
+                        <button mat-icon-button [matMenuTriggerFor]="childActionsMenu" matTooltip="Actions">
+                          <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #childActionsMenu="matMenu">
+                          <button mat-menu-item (click)="onViewEmployee(childNode.employee)">
+                            <mat-icon>visibility</mat-icon>
+                            <span>View Details</span>
+                          </button>
+                          <button mat-menu-item (click)="onEditEmployee(childNode.employee)">
+                            <mat-icon>edit</mat-icon>
+                            <span>Edit</span>
+                          </button>
+                          <button mat-menu-item (click)="onAddDirectReport(childNode.employee)">
+                            <mat-icon>person_add</mat-icon>
+                            <span>Add Direct Report</span>
+                          </button>
+                          <mat-divider></mat-divider>
+                          <button mat-menu-item (click)="onDeleteEmployee(childNode.employee)" class="delete-action">
+                            <mat-icon>delete</mat-icon>
+                            <span>Remove</span>
+                          </button>
+                        </mat-menu>
+                      </div>
+                    </mat-card-header>
+
+                    <mat-card-content class="employee-content">
+                      <!-- Child Skills -->
+                      <div *ngIf="childNode.employee.skills && childNode.employee.skills.length > 0" class="skills-section">
+                        <div class="skills-container">
+                          <mat-chip *ngFor="let skill of childNode.employee.skills.slice(0, 2)" class="skill-chip">
+                            {{ skill }}
+                          </mat-chip>
+                          <mat-chip *ngIf="childNode.employee.skills.length > 2" class="more-skills">
+                            +{{ childNode.employee.skills.length - 2 }}
+                          </mat-chip>
+                        </div>
+                      </div>
+
+                      <!-- Sub-team Expansion -->
+                      <div *ngIf="childNode.children.length > 0" class="expand-section">
+                        <button mat-stroked-button 
+                                (click)="toggleNode(childNode)"
+                                [color]="childNode.expanded ? 'warn' : 'primary'"
+                                class="expand-button compact">
+                          <mat-icon>{{ childNode.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                          {{ childNode.expanded ? 'Hide' : 'Show' }} Team ({{ childNode.children.length }})
+                        </button>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+
+                  <!-- Nested Children (Third Level) -->
+                  <div *ngIf="childNode.children.length > 0 && childNode.expanded" class="nested-children">
+                    <div class="nested-container" 
+                         cdkDropList
+                         [cdkDropListData]="getChildEmployees(childNode)"
+                         (cdkDropListDropped)="onDrop($event, childNode.employee.id)">
+                      
+                      <div *ngFor="let nestedChild of childNode.children" 
+                           class="nested-child-wrapper"
+                           [style.margin-left.px]="viewMode === 'tree' ? 60 : 20">
+                        
+                        <mat-card class="employee-card nested-card" 
+                                  [style.border-left-color]="getLevelColor(nestedChild.level)"
+                                  cdkDrag 
+                                  [cdkDragData]="nestedChild.employee">
+                          
+                          <div class="drag-handle compact" cdkDragHandle>
+                            <mat-icon>drag_indicator</mat-icon>
+                          </div>
+
+                          <mat-card-header class="compact-header">
+                            <div class="employee-avatar compact" mat-card-avatar>
+                              <img *ngIf="nestedChild.employee.avatar" 
+                                   [src]="nestedChild.employee.avatar" 
+                                   [alt]="nestedChild.employee.name"
+                                   class="avatar-image">
+                              <mat-icon *ngIf="!nestedChild.employee.avatar" class="default-avatar">person</mat-icon>
+                              <div class="level-ring compact" [style.border-color]="getLevelColor(nestedChild.level)"></div>
+                            </div>
+                            
+                            <mat-card-title class="employee-name compact">
+                              {{ nestedChild.employee.name }}
+                            </mat-card-title>
+                            
+                            <mat-card-subtitle class="employee-details compact">
+                              <div class="position">{{ nestedChild.employee.position }}</div>
+                              <div class="department" [style.color]="getDepartmentColor(nestedChild.employee.department)">
+                                {{ nestedChild.employee.department }}
+                              </div>
+                            </mat-card-subtitle>
+
+                            <!-- Nested Actions -->
+                            <div class="card-actions">
+                              <button mat-icon-button [matMenuTriggerFor]="nestedActionsMenu" matTooltip="Actions">
+                                <mat-icon>more_vert</mat-icon>
+                              </button>
+                              <mat-menu #nestedActionsMenu="matMenu">
+                                <button mat-menu-item (click)="onViewEmployee(nestedChild.employee)">
+                                  <mat-icon>visibility</mat-icon>
+                                  <span>View Details</span>
+                                </button>
+                                <button mat-menu-item (click)="onEditEmployee(nestedChild.employee)">
+                                  <mat-icon>edit</mat-icon>
+                                  <span>Edit</span>
+                                </button>
+                                <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="onDeleteEmployee(nestedChild.employee)" class="delete-action">
+                                  <mat-icon>delete</mat-icon>
+                                  <span>Remove</span>
+                                </button>
+                              </mat-menu>
+                            </div>
+                          </mat-card-header>
+                        </mat-card>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && organizationTree.length === 0" class="empty-state">
+    <mat-icon class="empty-icon">account_tree</mat-icon>
+    <h2>No Organization Data</h2>
+    <p>Get started by adding employees to build your organization chart.</p>
+    <button mat-raised-button color="primary" (click)="onAddDirectReport(null)">
+      <mat-icon>person_add</mat-icon>
+      Add First Employee
+    </button>
+  </div>
+</div> 
