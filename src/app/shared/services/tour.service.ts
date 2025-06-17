@@ -6,7 +6,7 @@ export interface TourStep {
   title: string;
   content: string;
   target: string; // CSS selector
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
   route?: string; // Optional route to navigate to
   action?: () => void; // Optional action to perform
   showSkip?: boolean;
@@ -109,6 +109,22 @@ export class TourService {
           highlightPadding: 12
         },
         {
+          id: 'content-manager-plans',
+          title: 'Training Plans',
+          content: 'Let\'s explore the Training Plans section. Click Next to navigate there and see how to create comprehensive training programs.',
+          target: 'a[routerLink="/content-manager/plans"]',
+          route: '/content-manager/plans',
+          position: 'right',
+          showSkip: true,
+          showPrevious: true,
+          showNext: true,
+          backdrop: true,
+          highlightPadding: 8,
+          action: () => {
+            // This will be handled in the service
+          }
+        },
+        {
           id: 'question-grading',
           title: 'Question Grading System',
           content: 'Create and manage questions for assessments. Build comprehensive quizzes and evaluations for your training programs.',
@@ -133,6 +149,19 @@ export class TourService {
           highlightPadding: 12
         },
         {
+          id: 'company-profile-generator',
+          title: 'Profile Generator',
+          content: 'Now let\'s visit the Profile Generator to see how AI creates comprehensive company profiles. Click Next to navigate there.',
+          target: 'a[routerLink="/company/profile-generator/1"]',
+          route: '/company/profile-generator/1',
+          position: 'right',
+          showSkip: true,
+          showPrevious: true,
+          showNext: true,
+          backdrop: true,
+          highlightPadding: 8
+        },
+        {
           id: 'employee-section',
           title: 'Employee Management',
           content: 'Analyze CVs, manage employee profiles, and maintain your talent pool. Everything you need for HR management.',
@@ -143,6 +172,19 @@ export class TourService {
           showNext: true,
           backdrop: true,
           highlightPadding: 12
+        },
+        {
+          id: 'talent-pool-demo',
+          title: 'Talent Pool Experience',
+          content: 'Let\'s visit the Talent Pool to see how you can manage and analyze your team members. Click Next to see this powerful HR tool in action.',
+          target: 'a[routerLink="/employee/talent-pool"]',
+          route: '/employee/talent-pool',
+          position: 'right',
+          showSkip: true,
+          showPrevious: true,
+          showNext: true,
+          backdrop: true,
+          highlightPadding: 8
         },
         {
           id: 'toolbar-actions',
@@ -176,22 +218,46 @@ export class TourService {
       description: 'Explore the content management features in detail',
       steps: [
         {
-          id: 'training-plans',
-          title: 'Training Plans',
-          content: 'Create and manage comprehensive training programs for your organization.',
-          target: 'a[routerLink="/content-manager/plans"]',
-          route: '/content-manager/plans',
+          id: 'content-manager-intro',
+          title: 'Content Manager Overview',
+          content: 'Welcome to the Content Manager! This is your hub for creating and managing all training content. Let\'s explore each feature.',
+          target: '.nav-section:has(.nav-section-header mat-icon:contains("video_library"))',
           position: 'right',
           showSkip: true,
           showPrevious: false,
           showNext: true,
           backdrop: true,
+          highlightPadding: 12
+        },
+        {
+          id: 'training-plans',
+          title: 'Training Plans',
+          content: 'Let\'s visit the Training Plans page to see how you create and manage comprehensive training programs. Click Next to navigate there.',
+          target: 'a[routerLink="/content-manager/plans"]',
+          route: '/content-manager/plans',
+          position: 'right',
+          showSkip: true,
+          showPrevious: true,
+          showNext: true,
+          backdrop: true,
           highlightPadding: 8
+        },
+        {
+          id: 'plans-page-features',
+          title: 'Plans Page Features',
+          content: 'Here you can create new training plans, organize them by categories, and track their progress. Notice the intuitive interface for managing multiple programs.',
+          target: '.main-content',
+          position: 'center',
+          showSkip: true,
+          showPrevious: true,
+          showNext: true,
+          backdrop: true,
+          highlightPadding: 20
         },
         {
           id: 'subject-builder',
           title: 'Subject Builder',
-          content: 'Build custom subjects and curriculum for your training programs.',
+          content: 'Now let\'s explore the Subject Builder where you create custom curriculum. Click Next to navigate there and see the powerful building tools.',
           target: 'a[routerLink="/content-manager/subject-builder/1"]',
           route: '/content-manager/subject-builder/1',
           position: 'right',

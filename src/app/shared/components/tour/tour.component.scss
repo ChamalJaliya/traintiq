@@ -5,7 +5,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 999999;
+  z-index: 999999999;
   pointer-events: none;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
@@ -21,7 +21,7 @@
   max-width: 400px;
   width: 400px;
   pointer-events: auto;
-  z-index: 1000000;
+  z-index: 9999999999;
   animation: tourSlideIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.25));
 }
@@ -293,7 +293,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1000001;
+  z-index: 99999999999;
   pointer-events: auto;
   animation: tourBounceIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -385,7 +385,7 @@
 // Enhanced highlight styles for tour targets
 :host ::ng-deep .tour-highlight {
   position: relative !important;
-  z-index: 999998 !important;
+  z-index: 999999998 !important;
   border-radius: 8px !important;
   animation: tourPulse 3s ease-in-out infinite !important;
   background-color: rgba(25, 118, 210, 0.06) !important;

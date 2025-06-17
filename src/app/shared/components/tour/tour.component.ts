@@ -7,7 +7,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { TourService } from '../../services/tour.service';
-import { TourStep } from '../../models/tour-step.model';
 
 @Component({
   selector: 'app-tour',
@@ -184,6 +183,12 @@ export class TourComponent implements OnInit, OnDestroy {
               left = rect.left - cardWidth - padding;
               top = rect.top + (rect.height / 2) - (cardHeight / 2);
             }
+            break;
+            
+          case 'center':
+            // Center the card on screen
+            left = (window.innerWidth / 2) - (cardWidth / 2);
+            top = (window.innerHeight / 2) - (cardHeight / 2);
             break;
             
           default:
