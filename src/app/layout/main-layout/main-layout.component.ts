@@ -92,10 +92,14 @@ import { ChatBotComponent } from '../../shared/components/chat-bot/chat-bot.comp
               <mat-icon>history</mat-icon>
               <span>Generation History</span>
             </a>
-            <a mat-list-item routerLink="/company/settings" routerLinkActive="active" class="nav-item">
-              <mat-icon>settings</mat-icon>
-              <span>Settings</span>
-            </a>
+            <a mat-list-item routerLink="/company/organization-chart" routerLinkActive="active">
+          <mat-icon>account_tree</mat-icon>
+          <span>Organization Chart</span>
+        </a>
+        <a mat-list-item routerLink="/company/organization-directory" routerLinkActive="active">
+          <mat-icon>people</mat-icon>
+          <span>Organization Directory</span>
+        </a>
           </div>
 
           <!-- Employee Section -->

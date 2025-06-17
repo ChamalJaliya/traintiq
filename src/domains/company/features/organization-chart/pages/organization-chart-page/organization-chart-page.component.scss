@@ -1,17 +1,17 @@
-// Professional Organization Chart with Traintiq Blue Theme
 .organization-chart-container {
   padding: 24px;
   background: #f8f9fa;
   min-height: calc(100vh - 64px);
 
-  // Clean Header Design
   .chart-header {
-    background: white;
+    background: transparent;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 24px;
     margin-bottom: 24px;
     border-top: 3px solid #3f51b5;
+    border: 1px solid rgba(63, 81, 181, 0.2);
+    backdrop-filter: blur(8px);
 
     .header-content {
       margin-bottom: 16px;
@@ -48,9 +48,39 @@
       flex-wrap: wrap;
 
       .view-options,
-      .toggle-options {
+      .toggle-options,
+      .zoom-controls {
         display: flex;
         gap: 8px;
+        align-items: center;
+      }
+
+      .zoom-controls {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 4px;
+        background: #f9f9f9;
+
+        .zoom-level {
+          font-size: 12px;
+          font-weight: 500;
+          color: #666;
+          min-width: 40px;
+          text-align: center;
+        }
+
+        button {
+          width: 32px;
+          height: 32px;
+          min-width: 32px;
+          
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            margin: 0;
+          }
+        }
       }
 
       button {
@@ -58,11 +88,6 @@
         font-size: 13px;
         font-weight: 500;
         border-radius: 6px;
-
-        &[color="primary"] {
-          background-color: #3f51b5;
-          color: white;
-        }
 
         mat-icon {
           margin-right: 4px;
@@ -74,16 +99,17 @@
     }
   }
 
-  // Loading State
   .loading-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    background: white;
+    background: transparent;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(63, 81, 181, 0.2);
+    backdrop-filter: blur(8px);
 
     mat-spinner {
       margin-bottom: 16px;
@@ -96,14 +122,26 @@
     }
   }
 
-  // Tree Legend
+  .debug-info {
+    background: #f0f0f0;
+    padding: 8px 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
+    color: #666;
+    border-left: 3px solid #2196f3;
+  }
+
   .tree-legend {
-    background: white;
+    background: transparent;
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-left: 3px solid #2196f3;
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    backdrop-filter: blur(8px);
 
     h3 {
       margin: 0 0 12px 0;
@@ -138,52 +176,177 @@
     }
   }
 
-  // Clean Organization Tree
   .organization-tree {
-    background: white;
+    background: transparent;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    min-height: 400px;
+    border: 1px solid rgba(63, 81, 181, 0.2);
+    backdrop-filter: blur(8px);
 
     .tree-container {
       padding: 24px;
+      position: relative;
+      width: fit-content;
+      min-width: 100%;
+      min-height: 100%;
+      background: transparent;
+      
+      // For Tree and Compact views - ensure proper panel styling
+      &:not(.branch-mode) {
+        background: transparent;
+        margin: 0;
+        padding: 24px;
+        min-height: 500px;
+      }
     }
 
-    // Tree Node Layout
+    // Tree and Compact view wrapper with zoom/pan functionality
+    .tree-compact-wrapper {
+      background: linear-gradient(45deg, #f9f9f9 25%, transparent 25%), 
+                  linear-gradient(-45deg, #f9f9f9 25%, transparent 25%), 
+                  linear-gradient(45deg, transparent 75%, #f9f9f9 75%), 
+                  linear-gradient(-45deg, transparent 75%, #f9f9f9 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      height: 600px;
+      position: relative;
+      cursor: grab;
+      border: 2px solid #e0e0e0;
+
+      &:active {
+        cursor: grabbing;
+      }
+
+      .tree-container {
+        padding: 24px;
+        position: relative;
+        width: fit-content;
+        min-width: 100%;
+        min-height: 100%;
+        background: transparent;
+        transition: transform 0.2s ease;
+      }
+    }
+
+    .interactive-tree-viewport {
+      width: 100%;
+      height: 600px;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      background: linear-gradient(45deg, #f9f9f9 25%, transparent 25%), 
+                  linear-gradient(-45deg, #f9f9f9 25%, transparent 25%), 
+                  linear-gradient(45deg, transparent 75%, #f9f9f9 75%), 
+                  linear-gradient(-45deg, transparent 75%, #f9f9f9 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+
+      &:active {
+        cursor: grabbing;
+      }
+
+      &.panning {
+        cursor: grabbing;
+      }
+    }
+
+    .branch-view-container {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+
+      .tree-container {
+        padding: 0;
+        min-width: 100%;
+        background: transparent;
+      }
+
+      .nodes-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+      }
+    }
+
+    .branch-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+
+      .connection-line {
+        stroke: #c5c5c5;
+        stroke-width: 2;
+        fill: none;
+        transition: stroke 0.2s ease;
+
+        &.highlighted {
+          stroke: #3f51b5;
+          stroke-width: 3;
+        }
+      }
+    }
+
     .tree-node-wrapper {
       position: relative;
       margin-bottom: 20px;
+      z-index: 2;
 
-      // Level Badge
-      .level-badge {
+      &.branch-node {
         position: absolute;
-        top: -6px;
-        left: -6px;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 8px;
-        font-size: 10px;
-        font-weight: 600;
-        z-index: 10;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        width: 260px;
+        margin-bottom: 0;
+
+        &:hover {
+          transform: translateY(-2px);
+          z-index: 10;
+        }
       }
 
-      // Root Indicator
-      .root-indicator {
+      .level-badge {
         position: absolute;
         top: -8px;
-        right: -8px;
-        background: #ff9800;
+        left: -8px;
         color: white;
         padding: 4px 8px;
         border-radius: 12px;
         font-size: 10px;
-        font-weight: 600;
+        font-weight: 700;
+        z-index: 10;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        border: 2px solid white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(4px);
+      }
+
+      .root-indicator {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: linear-gradient(135deg, #ff9800, #ffb74d);
+        color: white;
+        padding: 6px 10px;
+        border-radius: 16px;
+        font-size: 9px;
+        font-weight: 700;
         display: flex;
         align-items: center;
-        gap: 3px;
+        gap: 4px;
         z-index: 10;
-        box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        border: 2px solid white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
 
         mat-icon {
           font-size: 12px;
@@ -193,89 +356,158 @@
       }
     }
 
-    // Employee Card Container
     .employee-card-container {
       position: relative;
+      margin-bottom: 16px;
       
       &.cdk-drop-list-dragging {
         background: rgba(63, 81, 181, 0.05);
         border: 2px dashed #3f51b5;
         border-radius: 8px;
-        padding: 4px;
+        padding: 8px;
       }
     }
 
-    // Clean Employee Card
     .employee-card {
+      max-width: 320px;
+      margin: 0 auto;
+      border: 1px solid rgba(63, 81, 181, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      border-radius: 8px;
-      border: 1px solid #e0e0e0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      transition: all 0.2s ease;
-      border-left: 4px solid #e0e0e0;
-      background: white;
-      max-width: 400px;
+      background: transparent;
+      border-left: 4px solid #3f51b5;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #3f51b5, #2196f3, #00bcd4);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(63, 81, 181, 0.2);
+        border-color: rgba(63, 81, 181, 0.4);
+        background: rgba(255, 255, 255, 0.1);
+
+        &::before {
+          opacity: 1;
+        }
       }
 
       &.root-card {
         border-left-color: #ff9800;
-        background: linear-gradient(135deg, #fff3e0, #ffffff);
+        background: transparent;
+        border-color: rgba(255, 152, 0, 0.3);
       }
 
       &.manager-card {
-        border-left-color: #3f51b5;
-        border-left-width: 4px;
+        border-left-color: #2196f3;
+        background: transparent;
+        border-color: rgba(33, 150, 243, 0.3);
       }
 
       &.child-card {
-        max-width: 360px;
-        border-left-color: #2196f3;
-        border-left-width: 3px;
-        margin: 8px 0;
+        max-width: 280px;
+        border-left-color: #00bcd4;
       }
 
       &.nested-card {
-        max-width: 320px;
-        border-left-color: #00bcd4;
-        border-left-width: 3px;
-        margin: 6px 0;
+        max-width: 240px;
+        border-left-color: #4caf50;
+      }
 
-        &.compact {
-          max-width: 300px;
+      &.branch-card {
+        width: 100%;
+        height: 150px;
+        border-radius: 16px;
+        border: 2px solid rgba(63, 81, 181, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 18px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        margin: 12px;
+        backdrop-filter: blur(12px);
+
+        &:hover {
+          border-color: #3f51b5;
+          transform: translateY(-3px);
+          box-shadow: 0 8px 32px rgba(63, 81, 181, 0.25);
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        mat-card-header {
+          padding: 0;
+          margin-bottom: 8px;
+
+          .employee-avatar {
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+            margin-bottom: 0;
+          }
+
+          .employee-name {
+            margin-bottom: 4px;
+            font-size: 14px;
+            font-weight: 600;
+          }
+
+          .employee-details {
+            .position {
+              font-size: 12px;
+              margin-bottom: 2px;
+            }
+
+            .department {
+              font-size: 11px;
+              margin-bottom: 4px;
+            }
+
+            .hierarchy-info {
+              font-size: 10px;
+              
+              mat-icon {
+                font-size: 12px;
+                width: 12px;
+                height: 12px;
+              }
+            }
+          }
+
+          .card-actions {
+            top: 8px;
+            right: 8px;
+          }
         }
       }
 
-      // Drag Handle
       .drag-handle {
         position: absolute;
-        top: 50%;
-        left: -12px;
-        transform: translateY(-50%);
-        background: #3f51b5;
-        color: white;
-        width: 20px;
-        height: 32px;
-        border-radius: 0 6px 6px 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        top: 8px;
+        right: 8px;
+        color: rgba(0, 0, 0, 0.3);
         cursor: grab;
-        opacity: 0;
+        z-index: 10;
+        padding: 4px;
+        border-radius: 4px;
         transition: all 0.2s ease;
-        z-index: 5;
 
         &:hover {
-          opacity: 1;
-          width: 24px;
-        }
-
-        &.compact {
-          width: 18px;
-          height: 28px;
+          background: rgba(63, 81, 181, 0.1);
+          color: #3f51b5;
         }
 
         &:active {
@@ -283,296 +515,186 @@
         }
 
         mat-icon {
-          font-size: 14px;
-          width: 14px;
-          height: 14px;
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
         }
       }
 
-      &:hover .drag-handle {
-        opacity: 0.7;
-      }
-
-      &.cdk-drag-dragging {
-        transform: rotate(3deg) scale(1.02);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-
-        .drag-handle {
-          opacity: 1;
-        }
-      }
-
-      // Employee Avatar
-      .employee-avatar {
+      mat-card-header {
+        padding: 16px 16px 8px 16px;
         position: relative;
-        
-        .avatar-image {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          object-fit: cover;
-          border: 2px solid white;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
 
-        .default-avatar {
-          width: 44px;
-          height: 44px;
+        .employee-avatar {
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3f51b5, #2196f3);
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 20px;
-          border: 2px solid white;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        // Level Ring
-        .level-ring {
-          position: absolute;
-          top: -2px;
-          left: -2px;
-          right: -2px;
-          bottom: -2px;
-          border-radius: 50%;
-          border: 2px solid;
-          opacity: 0.6;
+          position: relative;
+          margin-right: 16px;
+          margin-bottom: 8px;
 
           &.compact {
-            border-width: 1px;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
+            width: 40px;
+            height: 40px;
           }
-        }
 
-        &.compact {
-          .avatar-image,
+          .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
           .default-avatar {
-            width: 36px;
-            height: 36px;
-            font-size: 16px;
-          }
-        }
-      }
-
-      // Employee Name and Badges
-      .employee-name {
-        font-size: 16px;
-        font-weight: 600;
-        color: #1a237e;
-        margin-bottom: 4px;
-
-        &.compact {
-          font-size: 14px;
-        }
-
-        .employee-badges {
-          display: flex;
-          gap: 4px;
-          margin-top: 4px;
-
-          .status-chip {
-            font-size: 10px;
-            min-height: 20px;
-            font-weight: 500;
-            border-radius: 10px;
-          }
-
-          .root-chip {
-            background: #ff9800 !important;
-            color: white !important;
-            font-weight: 600;
-          }
-        }
-      }
-
-      // Employee Details
-      .employee-details {
-        margin-top: 6px;
-
-        &.compact {
-          margin-top: 4px;
-        }
-
-        .position-level {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 4px;
-
-          .position {
-            font-weight: 500;
-            color: #333;
-            font-size: 13px;
-          }
-
-          .level-text {
-            font-size: 10px;
-            padding: 2px 6px;
-            background: rgba(63, 81, 181, 0.1);
-            color: #3f51b5;
-            border-radius: 8px;
-            font-weight: 500;
-          }
-        }
-
-        .department {
-          font-weight: 500;
-          font-size: 12px;
-          margin-bottom: 4px;
-        }
-
-        .hierarchy-info {
-          .reports-count {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 3px;
+            justify-content: center;
+            font-size: 20px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .level-ring {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 3px solid;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          }
+        }
+
+        .employee-name {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1a237e;
+          margin: 0 0 4px 0;
+          line-height: 1.2;
+
+          &.compact {
+            font-size: 14px;
+          }
+        }
+
+        .employee-details {
+          color: #555;
+          font-size: 14px;
+          line-height: 1.3;
+
+          .position {
+            font-size: 14px;
+            font-weight: 500;
+            color: #3f51b5;
+            margin-bottom: 2px;
+            line-height: 1.2;
+
+            &.compact {
+              font-size: 12px;
+            }
+          }
+
+          .department {
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+
+            &.compact {
+              font-size: 11px;
+            }
+          }
+          
+          .hierarchy-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
             font-size: 11px;
             color: #666;
-            font-weight: 500;
-
+            
             mat-icon {
               font-size: 14px;
               width: 14px;
               height: 14px;
-              color: #4caf50;
+            }
+          }
+        }
+
+        .card-actions {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          z-index: 15;
+
+          button {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            color: rgba(63, 81, 181, 0.8);
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+
+            &:hover {
+              color: #3f51b5;
+              background: rgba(255, 255, 255, 0.3);
+              box-shadow: 0 4px 12px rgba(63, 81, 181, 0.2);
+              transform: scale(1.05);
+              border-color: rgba(63, 81, 181, 0.3);
+            }
+
+            mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
             }
           }
         }
       }
 
-      // Card Actions
-      .card-actions {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-
-        button {
-          width: 28px;
-          height: 28px;
-          min-width: unset;
-          
-          mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
-          }
-        }
-      }
-
-      &:hover .card-actions {
-        opacity: 1;
-      }
-
-      // Skills Section
-      .skills-section {
-        margin-top: 8px;
-
-        .skills-container {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 3px;
-
-          .skill-chip {
-            font-size: 9px;
-            min-height: 18px;
-            background: rgba(63, 81, 181, 0.1);
-            color: #3f51b5;
-            border-radius: 9px;
-            font-weight: 500;
-            padding: 0 6px;
-          }
-
-          .more-skills {
-            font-size: 9px;
-            min-height: 18px;
-            background: #ff9800;
-            color: white;
-            border-radius: 9px;
-            font-weight: 500;
-            padding: 0 6px;
-          }
-        }
-      }
-
-      // Expand Section
-      .expand-section {
-        margin-top: 8px;
-        text-align: center;
-
-        .expand-button {
-          min-width: 100px;
-          height: 28px;
-          border-radius: 14px;
-          font-size: 11px;
-          font-weight: 500;
-
-          &.compact {
-            min-width: 80px;
-            height: 24px;
-            font-size: 10px;
-          }
-
-          &[color="primary"] {
-            background: #3f51b5;
-            color: white;
-          }
-
-          &[color="warn"] {
-            background: #f44336;
-            color: white;
-          }
-
-          mat-icon {
-            margin-right: 3px;
-            font-size: 14px;
-            width: 14px;
-            height: 14px;
-          }
-        }
-      }
-
-      // Card Header and Content Padding
-      .mat-mdc-card-header {
-        padding: 16px 16px 12px 16px;
-      }
-
-      .mat-mdc-card-content {
+      mat-card-content {
         padding: 0 16px 16px 16px;
+
+        .skills-section {
+          margin-bottom: 12px;
+
+          .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+
+            .skill-chip {
+              background: rgba(63, 81, 181, 0.1);
+              color: #3f51b5;
+              font-size: 10px;
+              font-weight: 500;
+              height: 20px;
+              padding: 0 6px;
+              border-radius: 10px;
+            }
+          }
+        }
       }
     }
 
-    // Tree Connector Lines
-    .tree-connector {
-      position: absolute;
-      width: 1px;
-      background: linear-gradient(to bottom, #3f51b5, transparent);
-      z-index: 1;
-      opacity: 0.4;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -3px;
-        width: 7px;
-        height: 1px;
-        background: #3f51b5;
-        border-radius: 1px;
-      }
-    }
-
-    // Child Nodes
     .child-nodes {
-      position: relative;
-      margin-top: 12px;
+      margin-top: 16px;
+      margin-left: 20px;
+      border-left: 2px solid rgba(33, 150, 243, 0.2);
+      padding-left: 16px;
 
       .children-container {
         &.cdk-drop-list-dragging {
@@ -580,7 +702,6 @@
           border: 2px dashed #2196f3;
           border-radius: 8px;
           padding: 8px;
-          margin: 4px 0;
         }
       }
 
@@ -593,15 +714,14 @@
           top: -4px;
           left: -4px;
           color: white;
-          padding: 2px 4px;
+          padding: 1px 4px;
           border-radius: 6px;
           font-size: 9px;
-          font-weight: 500;
+          font-weight: 600;
           z-index: 10;
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
-        // Child connector line
         &::before {
           content: '';
           position: absolute;
@@ -614,21 +734,11 @@
         }
       }
 
-      // Nested Children
       .nested-children {
         margin-top: 8px;
         margin-left: 16px;
         border-left: 1px dashed rgba(0, 188, 212, 0.3);
         padding-left: 12px;
-
-        .nested-container {
-          &.cdk-drop-list-dragging {
-            background: rgba(0, 188, 212, 0.05);
-            border: 2px dashed #00bcd4;
-            border-radius: 6px;
-            padding: 6px;
-          }
-        }
 
         .nested-child-wrapper {
           position: relative;
@@ -644,34 +754,125 @@
             background: linear-gradient(to right, #00bcd4, transparent);
             z-index: 1;
           }
+        }
+      }
+    }
 
-          .employee-card {
-            .compact-header {
-              padding: 12px 12px 8px 12px;
+    &.branch-mode {
+      .tree-container {
+        padding: 0;
+        min-width: 100%;
+      }
+    }
+
+    &.compact-mode {
+      .tree-node-wrapper {
+        margin-bottom: 10px;
+
+        .employee-card {
+          max-width: 280px;
+          
+          mat-card-header {
+            padding: 12px;
+
+            .employee-avatar {
+              width: 40px;
+              height: 40px;
+            }
+
+            .employee-name {
+              font-size: 14px;
+            }
+
+            .employee-details {
+              .position {
+                font-size: 12px;
+              }
+
+              .department {
+                font-size: 11px;
+              }
             }
           }
+
+          mat-card-content {
+            padding: 0 12px 12px 12px;
+          }
+        }
+      }
+
+      .child-nodes {
+        margin-left: 10px;
+        padding-left: 8px;
+        
+        .child-node-wrapper {
+          margin-bottom: 6px;
+        }
+      }
+
+      .nested-children {
+        margin-left: 8px;
+        padding-left: 6px;
+        
+        .nested-child-wrapper {
+          margin-bottom: 4px;
         }
       }
     }
   }
 
-  // Empty State
+  // Professional animations and effects
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+    }
+    50% {
+      box-shadow: 0 6px 16px rgba(255, 152, 0, 0.6);
+    }
+    100% {
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Add pulse animation to root indicators
+  .root-indicator {
+    animation: pulse 3s infinite;
+  }
+
+  // Add fade-in animation to cards
+  .employee-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
   .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 60px 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     text-align: center;
+    border: 1px solid rgba(63, 81, 181, 0.2);
+    backdrop-filter: blur(8px);
 
     .empty-icon {
       font-size: 48px;
       width: 48px;
       height: 48px;
-      color: #ccc;
+      color: #bbb;
       margin-bottom: 16px;
     }
 
@@ -696,27 +897,24 @@
       font-weight: 500;
     }
   }
-
-  // Menu Actions
-  .delete-action {
-    color: #f44336 !important;
-
-    mat-icon {
-      color: #f44336;
-    }
-  }
 }
 
-// Level Colors
-.organization-chart-container .tree-node-wrapper .level-badge {
-  &[style*="rgb(26, 35, 126)"] { background-color: #1a237e !important; } // CEO
-  &[style*="rgb(63, 81, 181)"] { background-color: #3f51b5 !important; } // C-Level
-  &[style*="rgb(33, 150, 243)"] { background-color: #2196f3 !important; } // Director
-  &[style*="rgb(0, 188, 212)"] { background-color: #00bcd4 !important; } // Manager
-  &[style*="rgb(76, 175, 80)"] { background-color: #4caf50 !important; } // Senior
+.level-badge {
+  &[style*="rgb(26, 35, 126)"] { background-color: #1a237e !important; }
+  &[style*="rgb(63, 81, 181)"] { background-color: #3f51b5 !important; }
+  &[style*="rgb(33, 150, 243)"] { background-color: #2196f3 !important; }
+  &[style*="rgb(0, 188, 212)"] { background-color: #00bcd4 !important; }
+  &[style*="rgb(76, 175, 80)"] { background-color: #4caf50 !important; }
 }
 
-// Responsive Design
+.child-level-badge {
+  &[style*="rgb(63, 81, 181)"] { background-color: #3f51b5 !important; }
+  &[style*="rgb(33, 150, 243)"] { background-color: #2196f3 !important; }
+  &[style*="rgb(0, 188, 212)"] { background-color: #00bcd4 !important; }
+  &[style*="rgb(76, 175, 80)"] { background-color: #4caf50 !important; }
+  &[style*="rgb(139, 195, 74)"] { background-color: #8bc34a !important; }
+}
+
 @media (max-width: 768px) {
   .organization-chart-container {
     padding: 16px;
@@ -772,7 +970,6 @@
   }
 }
 
-// CDK Drag Drop Styles
 .cdk-drag {
   transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
@@ -796,4 +993,4 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
   border-radius: 8px;
   transform: rotate(3deg);
-} 
+}

@@ -27,10 +27,6 @@ export const COMPANY_ROUTES: Routes = [
   {
     path: 'organization-directory',
     loadComponent: () => import('./features/organization-directory/pages/directory-page/directory-page.component').then(m => m.DirectoryPageComponent)
-  },
-  {
-    path: 'settings',
-    loadComponent: () => import('./features/settings/pages/settings-page/settings-page.component').then(m => m.SettingsPageComponent)
-  },
+  }
   // Add any other top-level company domain routes here
 ];

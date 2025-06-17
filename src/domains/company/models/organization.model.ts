@@ -14,6 +14,7 @@ export interface Employee {
   bio?: string;
   location?: string;
   directReports?: Employee[];
+  isManager?: boolean;
 }
 
 export interface Department {
@@ -30,9 +31,11 @@ export interface OrganizationNode {
   children: OrganizationNode[];
   level: number;
   expanded?: boolean;
+  x?: number;
+  y?: number;
 }
 
 export interface OrganizationViewMode {
-  chart: 'tree' | 'compact';
+  chart: 'tree' | 'compact' | 'branch';
   directory: 'list' | 'grid' | 'table';
 } 
