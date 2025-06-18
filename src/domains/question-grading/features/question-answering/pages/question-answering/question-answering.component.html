@@ -1,77 +1,319 @@
 <div class="question-answering-container">
-    <mat-card class="question-card" *ngIf="currentQuestion">
-        <mat-card-header>
-            <mat-card-title>Answer the Question</mat-card-title>
-            <div class="timer" [ngClass]="{'warning': timeLeft <= 30}">
+    <!-- Quiz Header -->
+    <div class="quiz-header">
+        <div class="header-content">
+            <mat-icon class="header-icon">quiz</mat-icon>
+            <div class="header-text">
+                <h1 class="header-title">Take Quiz</h1>
+                <p class="header-subtitle">Answer questions one by one to test your knowledge</p>
+            </div>
+        </div>
+        <div class="quiz-progress" *ngIf="currentQuestionIndex >= 0 && !quizCompleted">
+            <div class="progress-info">
+                <span class="question-counter">{{ currentQuestionIndex + 1 }} / {{ quizQuestions.length }}</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+                </div>
+            </div>
+            <div class="timer" *ngIf="timeLeft > 0" [class.warning]="timeLeft <= 30" [class.urgent]="timeLeft <= 10">
                 <mat-icon>timer</mat-icon>
-                <span>{{timeLeft | number:'2.0'}}s</span>
+                <span>{{ timeLeft }}s</span>
             </div>
-        </mat-card-header>
-        <mat-card-content>
-            <div class="question-section">
-                <div class="category" *ngIf="currentQuestion.category">
-                    <mat-icon>{{getCategoryIcon(currentQuestion.category)}}</mat-icon>
-                    <span>{{currentQuestion.category}}</span>
-                </div>
-                <p class="question-text">{{currentQuestion.text}}</p>
-            </div>
-
-            <form [formGroup]="answerForm" (ngSubmit)="onSubmit()">
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Your Answer</mat-label>
-                    <textarea matInput formControlName="answer" rows="3" 
-                             placeholder="Type your answer here..."></textarea>
-                    <mat-error *ngIf="answerForm.get('answer')?.hasError('required')">
-                        Answer is required
-                    </mat-error>
-                    <mat-error *ngIf="answerForm.get('answer')?.hasError('minlength')">
-                        Answer must be at least 2 characters long
-                    </mat-error>
-                </mat-form-field>
-
-                <div class="actions">
-                    <button mat-raised-button color="primary" type="submit" 
-                            [disabled]="!answerForm.valid || loading || isTimeUp">
-                        <mat-icon>send</mat-icon>
-                        Submit Answer
-                    </button>
-                    <button mat-stroked-button type="button" (click)="loadRandomQuestion()"
-                            [disabled]="loading">
-                        <mat-icon>skip_next</mat-icon>
-                        Next Question
-                    </button>
-                </div>
-            </form>
-
-            <mat-card class="result-card" *ngIf="lastSubmission">
-                <mat-card-content>
-                    <div class="score-section">
-                        <div class="score" [style.color]="getScoreColor(lastSubmission.similarityScore)">
-                            {{lastSubmission.similarityScore}}%
-                        </div>
-                        <div class="score-label">Similarity Score</div>
-                    </div>
-                    <div class="correct-answer">
-                        <div class="label">Correct Answer:</div>
-                        <div class="text">{{currentQuestion.correctAnswer}}</div>
-                    </div>
-                </mat-card-content>
-            </mat-card>
-        </mat-card-content>
-    </mat-card>
-
-    <div class="loading-container" *ngIf="loading">
-        <mat-spinner diameter="48"></mat-spinner>
-        <p>Loading question...</p>
+        </div>
     </div>
 
-    <div class="time-up-overlay" *ngIf="isTimeUp && !lastSubmission">
-        <mat-icon>alarm_off</mat-icon>
-        <h2>Time's Up!</h2>
-        <p>You ran out of time. Try the next question!</p>
-        <button mat-raised-button color="primary" (click)="loadRandomQuestion()">
-            <mat-icon>refresh</mat-icon>
-            Try Another Question
-        </button>
+    <!-- Start Quiz Section -->
+    <div *ngIf="!quizStarted && !quizCompleted" class="start-quiz-section">
+        <mat-card class="start-card">
+            <mat-card-content>
+                <div class="start-content">
+                    <mat-icon class="start-icon">play_circle_filled</mat-icon>
+                    <h2>Ready to Start?</h2>
+                    <p>This quiz contains <strong>{{ totalQuestions }}</strong> questions from various categories.</p>
+                    <div class="quiz-info">
+                        <div class="info-item">
+                            <mat-icon>quiz</mat-icon>
+                            <span>{{ totalQuestions }} Questions</span>
+                        </div>
+                        <div class="info-item">
+                            <mat-icon>schedule</mat-icon>
+                            <span>Timed Questions</span>
+                        </div>
+                        <div class="info-item">
+                            <mat-icon>assessment</mat-icon>
+                            <span>Instant Grading</span>
+                        </div>
+                    </div>
+                    <button mat-raised-button color="primary" (click)="startQuiz()" class="start-btn">
+                        <mat-icon>play_arrow</mat-icon>
+                        Start Quiz
+                    </button>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Current Question Section -->
+    <div *ngIf="quizStarted && !quizCompleted && currentQuestion" class="question-section">
+        <mat-card class="question-card">
+            <mat-card-header>
+                <div class="question-header">
+                    <div class="question-type-badge">
+                        <mat-icon>{{ getQuestionTypeIcon(currentQuestion.type) }}</mat-icon>
+                        <span>{{ getQuestionTypeLabel(currentQuestion.type) }}</span>
+                    </div>
+                    <div class="question-meta">
+                        <span class="points">{{ currentQuestion.points }} pts</span>
+                        <span class="category" *ngIf="currentQuestion.category">{{ currentQuestion.category }}</span>
+                    </div>
+                </div>
+            </mat-card-header>
+            
+            <mat-card-content>
+                <div class="question-content">
+                    <h3 class="question-text">{{ currentQuestion.text }}</h3>
+                    
+                    <!-- Text Input Question -->
+                    <div *ngIf="currentQuestion.type === 'text_input'" class="answer-section">
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Your Answer</mat-label>
+                            <textarea matInput 
+                                      rows="4" 
+                                      [(ngModel)]="currentAnswer" 
+                                      placeholder="Enter your answer here..."
+                                      [disabled]="loading"></textarea>
+                        </mat-form-field>
+                    </div>
+                    
+                    <!-- Multiple Choice Question -->
+                    <div *ngIf="currentQuestion.type === 'mcq'" class="answer-section">
+                        <mat-radio-group [(ngModel)]="selectedOption" class="mcq-options">
+                            <mat-radio-button 
+                                *ngFor="let option of currentQuestion.options; let optionIndex = index" 
+                                [value]="optionIndex"
+                                [disabled]="loading"
+                                class="mcq-option">
+                                {{ option }}
+                            </mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+                    
+                    <!-- True/False Question -->
+                    <div *ngIf="currentQuestion.type === 'true_false'" class="answer-section">
+                        <mat-radio-group [(ngModel)]="trueFalseAnswer" class="true-false-options">
+                            <mat-radio-button [value]="true" [disabled]="loading" class="true-option">
+                                <div class="radio-content">
+                                    <mat-icon>check_circle</mat-icon>
+                                    <span>True</span>
+                                </div>
+                            </mat-radio-button>
+                            <mat-radio-button [value]="false" [disabled]="loading" class="false-option">
+                                <div class="radio-content">
+                                    <mat-icon>cancel</mat-icon>
+                                    <span>False</span>
+                                </div>
+                            </mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+                    
+                    <!-- File Upload Question -->
+                    <div *ngIf="currentQuestion.type === 'file_upload'" class="answer-section">
+                        <div class="file-upload-area" 
+                             [class.dragover]="dragOver"
+                             (dragover)="onDragOver($event)" 
+                             (dragleave)="onDragLeave($event)"
+                             (drop)="onFileDropped($event)">
+                            <mat-icon>cloud_upload</mat-icon>
+                            <h4>Drop your file here or click to browse</h4>
+                            <p class="upload-hint">
+                                <span *ngIf="currentQuestion.allowedFileTypes?.length">
+                                    Allowed types: {{ currentQuestion.allowedFileTypes.join(', ').toUpperCase() }}
+                                </span>
+                                <span *ngIf="currentQuestion.maxFileSize"> • Max size: {{ currentQuestion.maxFileSize }}MB</span>
+                            </p>
+                            <input type="file" 
+                                   #fileInput 
+                                   (change)="onFileSelected($event)" 
+                                   style="display: none"
+                                   [accept]="getAcceptedFileTypes(currentQuestion.allowedFileTypes)"
+                                   [disabled]="loading">
+                            <button mat-raised-button color="primary" (click)="fileInput.click()" [disabled]="loading">
+                                <mat-icon>attach_file</mat-icon>
+                                Choose File
+                            </button>
+                        </div>
+                        
+                        <div *ngIf="uploadedFile" class="uploaded-file">
+                            <mat-icon>description</mat-icon>
+                            <span>{{ uploadedFile.name }}</span>
+                            <span class="file-size">({{ formatFileSize(uploadedFile.size) }})</span>
+                            <button mat-icon-button color="warn" (click)="removeFile()" [disabled]="loading">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        
+                        <div *ngIf="currentQuestion.submissionDeadline" class="deadline-info">
+                            <mat-icon>schedule</mat-icon>
+                            <span>Deadline: {{ currentQuestion.submissionDeadline | date:'medium' }}</span>
+                            <span class="deadline-status" [class.expired]="isDeadlineExpired(currentQuestion.submissionDeadline)">
+                                {{ getDeadlineStatus(currentQuestion.submissionDeadline) }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Schedule Call Question -->
+                    <div *ngIf="currentQuestion.type === 'schedule_call'" class="answer-section">
+                        <div class="call-scheduling">
+                            <div class="platform-info">
+                                <mat-icon>{{ getPlatformIcon(currentQuestion.meetingPlatform) }}</mat-icon>
+                                <span>{{ getMeetingPlatformLabel(currentQuestion.meetingPlatform) }} Meeting</span>
+                                <span *ngIf="currentQuestion.meetingDuration" class="duration">
+                                    ({{ currentQuestion.meetingDuration }} minutes)
+                                </span>
+                            </div>
+                            
+                            <div class="time-slots-grid">
+                                <h4>Select a time slot:</h4>
+                                <div class="slots-container">
+                                    <button *ngFor="let slot of getAvailableTimeSlots(); let slotIndex = index"
+                                            mat-stroked-button
+                                            [class.selected]="selectedTimeSlot === slotIndex"
+                                            (click)="selectTimeSlot(slotIndex, slot)"
+                                            [disabled]="loading"
+                                            class="time-slot-btn">
+                                        <div class="slot-info">
+                                            <span class="date">{{ slot.date }}</span>
+                                            <span class="time">{{ slot.time }}</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div *ngIf="selectedTimeSlot !== -1" class="meeting-confirmation">
+                                <mat-icon>event_available</mat-icon>
+                                <span>Meeting scheduled for {{ getSelectedSlotInfo() }}</span>
+                                <p class="meeting-note">A meeting link will be sent to your email before the scheduled time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question Actions -->
+                <div class="question-actions">
+                    <button mat-stroked-button 
+                            (click)="skipQuestion()"
+                            [disabled]="loading"
+                            class="skip-btn">
+                        <mat-icon>skip_next</mat-icon>
+                        Skip Question
+                    </button>
+                    <button mat-raised-button 
+                            color="primary" 
+                            (click)="submitCurrentAnswer()"
+                            [disabled]="!canSubmitCurrentAnswer() || loading"
+                            class="submit-btn">
+                        <mat-icon>{{ isLastQuestion() ? 'check' : 'arrow_forward' }}</mat-icon>
+                        {{ isLastQuestion() ? 'Finish Quiz' : 'Next Question' }}
+                    </button>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Loading Section -->
+    <div *ngIf="loading" class="loading-section">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Processing your answer...</p>
+    </div>
+
+    <!-- Quiz Results Section -->
+    <div *ngIf="quizCompleted" class="results-section">
+        <mat-card class="results-card">
+            <mat-card-content>
+                <div class="results-header">
+                    <mat-icon class="results-icon">emoji_events</mat-icon>
+                    <h2>Quiz Completed!</h2>
+                    <div class="final-score">
+                        <div class="score-circle" [class]="getScoreClass()">
+                            <span class="score-value">{{ getFinalPercentage() }}%</span>
+                            <span class="score-label">{{ getPerformanceLabel() }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-summary">
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <mat-icon>quiz</mat-icon>
+                            <span class="stat-label">Questions</span>
+                            <span class="stat-value">{{ quizAnswers.length }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <mat-icon>check_circle</mat-icon>
+                            <span class="stat-label">Correct</span>
+                            <span class="stat-value">{{ getCorrectAnswersCount() }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <mat-icon>star</mat-icon>
+                            <span class="stat-label">Points</span>
+                            <span class="stat-value">{{ getTotalScore() }}/{{ getTotalPossibleScore() }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <mat-icon>schedule</mat-icon>
+                            <span class="stat-label">Time</span>
+                            <span class="stat-value">{{ getTimeTaken() }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detailed-results">
+                    <h3>Detailed Results</h3>
+                    <div class="results-list">
+                        <div *ngFor="let answer of quizAnswers; let i = index" class="result-item">
+                            <div class="result-header">
+                                <span class="question-number">Q{{ i + 1 }}</span>
+                                <div class="result-badge" [class]="getResultClass(answer)">
+                                    <mat-icon>{{ getResultIcon(answer) }}</mat-icon>
+                                    <span>{{ answer.points }}/{{ getQuestionPoints(answer.questionId) }} pts</span>
+                                </div>
+                            </div>
+                            <div class="result-content">
+                                <p class="question-preview">{{ getQuestionText(answer.questionId) }}</p>
+                                <div class="answer-comparison" *ngIf="!answer.needsManualReview">
+                                    <div class="user-answer">
+                                        <strong>Your Answer:</strong> {{ answer.userAnswer }}
+                                    </div>
+                                    <div class="correct-answer" *ngIf="!answer.isCorrect">
+                                        <strong>Correct Answer:</strong> {{ getCorrectAnswer(answer.questionId) }}
+                                    </div>
+                                </div>
+                                <div class="manual-review" *ngIf="answer.needsManualReview">
+                                    <mat-icon>hourglass_empty</mat-icon>
+                                    <span>Pending manual review</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-actions">
+                    <button mat-raised-button color="primary" (click)="restartQuiz()" class="restart-btn">
+                        <mat-icon>refresh</mat-icon>
+                        Take Another Quiz
+                    </button>
+                    <button mat-stroked-button (click)="goBack()" class="back-btn">
+                        <mat-icon>arrow_back</mat-icon>
+                        Back to Questions
+                    </button>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- No Questions Available -->
+    <div *ngIf="!quizStarted && !quizCompleted && totalQuestions === 0" class="no-questions">
+        <mat-icon>quiz</mat-icon>
+        <h3>No Questions Available</h3>
+        <p>There are currently no questions in the pool. Create some questions first!</p>
     </div>
 </div> 

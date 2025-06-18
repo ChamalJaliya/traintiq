@@ -1,81 +1,422 @@
 <div class="question-creator-container">
-    <mat-card class="form-card">
-        <mat-card-header>
-            <mat-card-title>Create New Question</mat-card-title>
-            <mat-card-subtitle>Add a new question to the question pool</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-            <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Question Text</mat-label>
-                    <textarea matInput formControlName="text" rows="3" placeholder="Enter your question"></textarea>
-                    <mat-error *ngIf="questionForm.get('text')?.hasError('required')">
-                        Question text is required
-                    </mat-error>
-                    <mat-error *ngIf="questionForm.get('text')?.hasError('minlength')">
-                        Question must be at least 10 characters long
-                    </mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Correct Answer</mat-label>
-                    <textarea matInput formControlName="correctAnswer" rows="3" placeholder="Enter the correct answer"></textarea>
-                    <mat-error *ngIf="questionForm.get('correctAnswer')?.hasError('required')">
-                        Correct answer is required
-                    </mat-error>
-                    <mat-error *ngIf="questionForm.get('correctAnswer')?.hasError('minlength')">
-                        Answer must be at least 2 characters long
-                    </mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="fill" class="full-width">
-                    <mat-label>Category</mat-label>
-                    <input matInput formControlName="category" placeholder="Enter category (optional)">
-                </mat-form-field>
-
-                <button mat-raised-button color="primary" type="submit" [disabled]="!questionForm.valid">
-                    <mat-icon>add</mat-icon>
-                    Add Question
-                </button>
-            </form>
-        </mat-card-content>
-    </mat-card>
-
-    <mat-card class="questions-list">
-        <mat-card-header>
-            <mat-card-title>
-                <div class="header-with-count">
-                    Existing Questions
-                    <span class="question-count">{{questions.length}} Questions</span>
-                </div>
-            </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-            <div class="questions-grid">
-                <mat-card class="question-item" *ngFor="let question of questions">
-                    <mat-card-content>
-                        <div class="question-header">
-                            <mat-icon class="category-icon" [matTooltip]="question.category || 'Uncategorized'">
-                                {{getCategoryIcon(question.category)}}
-                            </mat-icon>
-                            <span class="category-label" *ngIf="question.category">{{question.category}}</span>
-                        </div>
-                        <div class="question-text">{{question.text}}</div>
-                        <div class="answer-section">
-                            <div class="answer-label">Correct Answer:</div>
-                            <div class="answer-text">{{question.correctAnswer}}</div>
-                        </div>
-                        <div class="question-footer">
-                            <span class="timestamp">Added {{question.createdAt | date:'medium'}}</span>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
+    <div class="creator-header">
+        <div class="header-content">
+            <mat-icon class="header-icon">quiz</mat-icon>
+            <div class="header-text">
+                <h1 class="header-title">Question Creator</h1>
+                <p class="header-subtitle">Create comprehensive assessments with multiple question types</p>
             </div>
+        </div>
+        <div class="header-actions">
+            <div class="total-questions-badge">
+                <mat-icon>library_books</mat-icon>
+                <span>{{questions.length}} Total</span>
+            </div>
+            <button mat-raised-button color="accent" (click)="generateRandomQuiz()" class="quiz-generator-btn">
+                <mat-icon>shuffle</mat-icon>
+                Generate Random Quiz
+            </button>
+        </div>
+    </div>
+
+    <div class="creator-content">
+        <!-- Question Creation Form -->
+        <mat-card class="form-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <mat-icon>add_circle</mat-icon>
+                    Create New Question
+                </mat-card-title>
+                <mat-card-subtitle>Design questions for your assessment</mat-card-subtitle>
+            </mat-card-header>
             
-            <div *ngIf="questions.length === 0" class="no-questions">
-                <mat-icon>quiz</mat-icon>
-                <p>No questions added yet. Start by creating your first question!</p>
-            </div>
-        </mat-card-content>
-    </mat-card>
+            <mat-card-content>
+                <form [formGroup]="questionForm" (ngSubmit)="onSubmit()" class="question-form">
+                    <!-- Question Type Selection -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <mat-icon>category</mat-icon>
+                            Question Type
+                        </h3>
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Select Question Type</mat-label>
+                            <mat-select formControlName="type" (selectionChange)="onQuestionTypeChange($event.value)">
+                                <mat-option *ngFor="let type of questionTypes" [value]="type.value">
+                                    <div class="type-option">
+                                        <mat-icon>{{ type.icon }}</mat-icon>
+                                        <span>{{ type.label }}</span>
+                                    </div>
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Basic Question Info -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <mat-icon>help_outline</mat-icon>
+                            Question Details
+                        </h3>
+                        
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Question Text</mat-label>
+                            <textarea matInput formControlName="text" rows="3" placeholder="Enter your question"></textarea>
+                            <mat-error *ngIf="questionForm.get('text')?.hasError('required')">
+                                Question text is required
+                            </mat-error>
+                            <mat-error *ngIf="questionForm.get('text')?.hasError('minlength')">
+                                Question must be at least 10 characters long
+                            </mat-error>
+                        </mat-form-field>
+
+                        <div class="form-row">
+                            <mat-form-field appearance="outline" class="half-width">
+                                <mat-label>Category</mat-label>
+                                <input matInput formControlName="category" placeholder="e.g., Programming, Mathematics">
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="quarter-width">
+                                <mat-label>Points</mat-label>
+                                <input matInput type="number" formControlName="points" min="1" max="100">
+                                <mat-error *ngIf="questionForm.get('points')?.hasError('required')">
+                                    Points are required
+                                </mat-error>
+                                <mat-error *ngIf="questionForm.get('points')?.hasError('min')">
+                                    Points must be at least 1
+                                </mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="quarter-width">
+                                <mat-label>Time Limit (seconds)</mat-label>
+                                <input matInput type="number" formControlName="timeLimit" min="0">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Type-specific fields -->
+                    
+                    <!-- Text Input Question -->
+                    <div *ngIf="questionForm.get('type')?.value === QuestionType.TEXT_INPUT" class="form-section">
+                        <h3 class="section-title">
+                            <mat-icon>edit</mat-icon>
+                            Correct Answer
+                        </h3>
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Model Answer</mat-label>
+                            <textarea matInput formControlName="correctAnswer" rows="4" 
+                                      placeholder="Enter the expected answer or key points"></textarea>
+                            <mat-error *ngIf="questionForm.get('correctAnswer')?.hasError('required')">
+                                Correct answer is required
+                            </mat-error>
+                            <mat-error *ngIf="questionForm.get('correctAnswer')?.hasError('minlength')">
+                                Answer must be at least 5 characters long
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Multiple Choice Question -->
+                    <div *ngIf="questionForm.get('type')?.value === QuestionType.MCQ" class="form-section">
+                        <h3 class="section-title">
+                            <mat-icon>radio_button_checked</mat-icon>
+                            Answer Options
+                        </h3>
+                        
+                        <div class="options-container">
+                            <div *ngFor="let option of optionsArray.controls; let i = index" class="option-row">
+                                <mat-form-field appearance="outline" class="option-input">
+                                    <mat-label>Option {{ i + 1 }}</mat-label>
+                                    <input matInput [formControl]="$any(option)" [placeholder]="'Enter option ' + (i + 1)">
+                                    <mat-error *ngIf="option.hasError('required')">
+                                        Option is required
+                                    </mat-error>
+                                </mat-form-field>
+                                
+                                <button mat-icon-button type="button" 
+                                        (click)="removeOption(i)" 
+                                        [disabled]="optionsArray.length <= 2"
+                                        matTooltip="Remove option">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button mat-stroked-button type="button" (click)="addOption()" class="add-option-btn">
+                            <mat-icon>add</mat-icon>
+                            Add Option
+                        </button>
+
+                        <mat-form-field appearance="outline" class="full-width correct-answer-select">
+                            <mat-label>Correct Answer</mat-label>
+                            <mat-select formControlName="correctOptionIndex">
+                                <mat-option *ngFor="let option of optionsArray.controls; let i = index" [value]="i">
+                                    Option {{ i + 1 }}: {{ option.value || 'Empty' }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- True/False Question -->
+                    <div *ngIf="questionForm.get('type')?.value === QuestionType.TRUE_FALSE" class="form-section">
+                        <h3 class="section-title">
+                            <mat-icon>check_circle</mat-icon>
+                            Correct Answer
+                        </h3>
+                        
+                        <div class="true-false-options">
+                            <mat-radio-group formControlName="isTrue" class="true-false-group">
+                                <mat-radio-button [value]="true" class="true-option">
+                                    <div class="radio-content">
+                                        <mat-icon>check_circle</mat-icon>
+                                        <span>True</span>
+                                    </div>
+                                </mat-radio-button>
+                                <mat-radio-button [value]="false" class="false-option">
+                                    <div class="radio-content">
+                                        <mat-icon>cancel</mat-icon>
+                                        <span>False</span>
+                                    </div>
+                                </mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Question -->
+                    <div *ngIf="questionForm.get('type')?.value === QuestionType.FILE_UPLOAD" class="form-section">
+                        <h3 class="section-title">
+                            <mat-icon>cloud_upload</mat-icon>
+                            File Upload Configuration
+                        </h3>
+                        
+                        <div class="form-row">
+                            <mat-form-field appearance="outline" class="half-width">
+                                <mat-label>Submission Deadline</mat-label>
+                                <input matInput type="datetime-local" formControlName="submissionDeadline">
+                                <mat-hint>Set deadline for file submissions</mat-hint>
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="outline" class="quarter-width">
+                                <mat-label>Max File Size (MB)</mat-label>
+                                <input matInput type="number" formControlName="maxFileSize" min="1" max="100" value="10">
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="outline" class="quarter-width">
+                                <mat-label>Allowed File Types</mat-label>
+                                <mat-select formControlName="allowedFileTypes" multiple>
+                                    <mat-option value="pdf">PDF</mat-option>
+                                    <mat-option value="doc">DOC</mat-option>
+                                    <mat-option value="docx">DOCX</mat-option>
+                                    <mat-option value="txt">TXT</mat-option>
+                                    <mat-option value="zip">ZIP</mat-option>
+                                    <mat-option value="jpg">JPG</mat-option>
+                                    <mat-option value="png">PNG</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        
+                        <div class="info-panel">
+                            <mat-icon>info</mat-icon>
+                            <div class="info-content">
+                                <p><strong>File Upload Question</strong></p>
+                                <p>Configure file submission requirements and deadlines. Common use cases:</p>
+                                <ul>
+                                    <li>Code samples and programming assignments</li>
+                                    <li>Design portfolios and visual work</li>
+                                    <li>Written reports and documentation</li>
+                                    <li>Project files and demonstrations</li>
+                                </ul>
+                                <p><em>Note: Responses will require manual grading by instructors.</em></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Call Question -->
+                    <div *ngIf="questionForm.get('type')?.value === QuestionType.SCHEDULE_CALL" class="form-section">
+                        <h3 class="section-title">
+                            <mat-icon>video_call</mat-icon>
+                            Interview Configuration
+                        </h3>
+                        
+                        <div class="form-row">
+                            <mat-form-field appearance="outline" class="half-width">
+                                <mat-label>Meeting Platform</mat-label>
+                                <mat-select formControlName="meetingPlatform">
+                                    <mat-option value="zoom">
+                                        <div class="platform-option">
+                                            <mat-icon>videocam</mat-icon>
+                                            <span>Zoom</span>
+                                        </div>
+                                    </mat-option>
+                                    <mat-option value="google_meet">
+                                        <div class="platform-option">
+                                            <mat-icon>video_call</mat-icon>
+                                            <span>Google Meet</span>
+                                        </div>
+                                    </mat-option>
+                                    <mat-option value="microsoft_teams">
+                                        <div class="platform-option">
+                                            <mat-icon>groups</mat-icon>
+                                            <span>Microsoft Teams</span>
+                                        </div>
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="outline" class="half-width">
+                                <mat-label>Meeting Duration (minutes)</mat-label>
+                                <mat-select formControlName="meetingDuration">
+                                    <mat-option value="15">15 minutes</mat-option>
+                                    <mat-option value="30">30 minutes</mat-option>
+                                    <mat-option value="45">45 minutes</mat-option>
+                                    <mat-option value="60">60 minutes</mat-option>
+                                    <mat-option value="90">90 minutes</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        
+                        <div class="info-panel">
+                            <mat-icon>info</mat-icon>
+                            <div class="info-content">
+                                <p><strong>Schedule Call Question</strong></p>
+                                <p>Configure video interview settings for detailed assessment. Features:</p>
+                                <ul>
+                                    <li>One-on-one technical interviews</li>
+                                    <li>Interactive problem-solving sessions</li>
+                                    <li>Portfolio reviews and discussions</li>
+                                    <li>Behavioral and cultural fit assessment</li>
+                                </ul>
+                                <p><em>Meeting links will be generated automatically based on selected platform.</em></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button mat-raised-button color="primary" type="submit" [disabled]="!questionForm.valid" class="submit-btn">
+                            <mat-icon>add</mat-icon>
+                            Add Question to Pool
+                        </button>
+                    </div>
+                </form>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Questions List -->
+        <mat-card class="questions-list">
+            <mat-card-header>
+                <mat-card-title>
+                    <div class="list-header">
+                        <div class="header-info">
+                            <mat-icon>library_books</mat-icon>
+                            Question Pool
+                        </div>
+                        <!-- <div class="question-stats">
+                            <mat-chip-set>
+                                <mat-chip class="total-chip">
+                                    <mat-icon>quiz</mat-icon>
+                                    {{ questions.length }} Questions
+                                </mat-chip>
+                            </mat-chip-set>
+                        </div> -->
+                    </div>
+                </mat-card-title>
+                <mat-card-subtitle>Manage your question collection</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+                <div class="questions-grid" *ngIf="questions.length > 0">
+                    <mat-card *ngFor="let question of questions" class="question-item">
+                        <mat-card-content>
+                            <div class="question-header">
+                                <div class="question-type-badge">
+                                    <mat-icon>{{ getQuestionTypeIcon(question.type) }}</mat-icon>
+                                    <span>{{ getQuestionTypeLabel(question.type) }}</span>
+                                </div>
+                                <div class="question-meta">
+                                    <span class="points">{{ question.points }} pts</span>
+                                    <span class="time-limit" *ngIf="question.timeLimit">{{ question.timeLimit }}s</span>
+                                </div>
+                            </div>
+                            
+                            <div class="question-content">
+                                <h4 class="question-text">{{ question.text }}</h4>
+                                
+                                <!-- Type-specific preview -->
+                                <div class="question-details">
+                                    <div *ngIf="question.type === QuestionType.TEXT_INPUT && question.correctAnswer" class="answer-preview">
+                                        <strong>Expected Answer:</strong>
+                                        <p>{{ question.correctAnswer | slice:0:100 }}{{ question.correctAnswer.length > 100 ? '...' : '' }}</p>
+                                    </div>
+                                    
+                                    <div *ngIf="question.type === QuestionType.MCQ && question.options" class="options-preview">
+                                        <strong>Options:</strong>
+                                        <ul>
+                                            <li *ngFor="let option of question.options; let i = index" 
+                                                [class.correct-option]="i === question.correctOptionIndex">
+                                                {{ option }}
+                                                <mat-icon *ngIf="i === question.correctOptionIndex" class="correct-icon">check_circle</mat-icon>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div *ngIf="question.type === QuestionType.TRUE_FALSE" class="true-false-preview">
+                                        <strong>Correct Answer:</strong>
+                                        <span class="answer-badge" [class.true-answer]="question.isTrue" [class.false-answer]="!question.isTrue">
+                                            <mat-icon>{{ question.isTrue ? 'check_circle' : 'cancel' }}</mat-icon>
+                                            {{ question.isTrue ? 'True' : 'False' }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div *ngIf="question.type === QuestionType.FILE_UPLOAD" class="file-upload-preview">
+                                        <strong>File Requirements:</strong>
+                                        <div class="file-details">
+                                            <span *ngIf="question.submissionDeadline" class="deadline">
+                                                <mat-icon>schedule</mat-icon>
+                                                Due: {{ question.submissionDeadline | date:'medium' }}
+                                            </span>
+                                            <span *ngIf="question.maxFileSize" class="file-size">
+                                                <mat-icon>storage</mat-icon>
+                                                Max: {{ question.maxFileSize }}MB
+                                            </span>
+                                            <span *ngIf="question.allowedFileTypes?.length" class="file-types">
+                                                <mat-icon>description</mat-icon>
+                                                Types: {{ question.allowedFileTypes.join(', ').toUpperCase() }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div *ngIf="question.type === QuestionType.SCHEDULE_CALL" class="schedule-call-preview">
+                                        <strong>Interview Settings:</strong>
+                                        <div class="call-details">
+                                            <span *ngIf="question.meetingPlatform" class="platform">
+                                                <mat-icon>videocam</mat-icon>
+                                                Platform: {{ getMeetingPlatformLabel(question.meetingPlatform) }}
+                                            </span>
+                                            <span *ngIf="question.meetingDuration" class="duration">
+                                                <mat-icon>timer</mat-icon>
+                                                Duration: {{ question.meetingDuration }} minutes
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="question-footer">
+                                <div class="category-info" *ngIf="question.category">
+                                    <mat-icon>{{ getCategoryIcon(question.category) }}</mat-icon>
+                                    <span>{{ question.category }}</span>
+                                </div>
+                                <span class="timestamp">{{ question.createdAt | date:'medium' }}</span>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+                
+                <div *ngIf="questions.length === 0" class="no-questions">
+                    <mat-icon>quiz</mat-icon>
+                    <h3>No Questions Yet</h3>
+                    <p>Start building your question pool by creating your first question above.</p>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
 </div> 
