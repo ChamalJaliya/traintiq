@@ -1,0 +1,83 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-content">
+        <mat-icon class="header-icon">video_library</mat-icon>
+        <h2>Insert Video</h2>
+      </div>
+      <button mat-icon-button (click)="close()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Platform Selection -->
+      <div class="platform-selection">
+        <h3>Select Platform</h3>
+        <div class="platform-grid">
+          <button 
+            *ngFor="let platform of platforms"
+            class="platform-btn"
+            [class.active]="selectedPlatform === platform.value"
+            (click)="onPlatformChange(platform.value)">
+            <mat-icon>{{ platform.icon }}</mat-icon>
+            <span>{{ platform.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Video URL Input -->
+      <div class="form-section">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Video URL</mat-label>
+          <input 
+            matInput 
+            [(ngModel)]="videoUrl" 
+            [placeholder]="getPlaceholderText()"
+            type="url">
+          <mat-icon matSuffix>link</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Video Title Input -->
+      <div class="form-section">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Video Title (Optional)</mat-label>
+          <input 
+            matInput 
+            [(ngModel)]="videoTitle" 
+            placeholder="Enter a title for the video">
+          <mat-icon matSuffix>title</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Preview Section -->
+      <div class="preview-section" *ngIf="videoUrl">
+        <h3>Preview</h3>
+        <div class="video-preview">
+          <mat-icon>play_circle_outline</mat-icon>
+          <div class="preview-info">
+            <h4>{{ videoTitle || 'Video' }}</h4>
+            <p>{{ selectedPlatform | titlecase }} Video</p>
+            <span class="preview-url">{{ videoUrl }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button mat-button (click)="close()" class="cancel-btn">
+        Cancel
+      </button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="insertVideo()"
+        [disabled]="!videoUrl"
+        class="insert-btn">
+        <mat-icon>add</mat-icon>
+        Insert Video
+      </button>
+    </div>
+  </div>
+</div> 

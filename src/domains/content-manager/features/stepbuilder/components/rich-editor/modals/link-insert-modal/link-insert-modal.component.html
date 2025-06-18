@@ -1,0 +1,45 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-content">
+        <mat-icon class="header-icon">link</mat-icon>
+        <h2>Insert Link</h2>
+      </div>
+      <button mat-icon-button (click)="close()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <mat-form-field appearance="outline">
+        <mat-label>Link URL</mat-label>
+        <input matInput [(ngModel)]="url" type="url" placeholder="https://example.com">
+        <mat-icon matSuffix>link</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Link Text</mat-label>
+        <input matInput [(ngModel)]="text" placeholder="Enter link text">
+        <mat-icon matSuffix>title</mat-icon>
+      </mat-form-field>
+
+      <div class="preview-section" *ngIf="url">
+        <h3>Preview</h3>
+        <div class="link-preview">
+          <a [href]="url" target="_blank" rel="noopener noreferrer">
+            {{ text || url }}
+            <mat-icon>open_in_new</mat-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button mat-button (click)="close()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="insertLink()" [disabled]="!url">
+        <mat-icon>add</mat-icon>
+        Insert Link
+      </button>
+    </div>
+  </div>
+</div> 

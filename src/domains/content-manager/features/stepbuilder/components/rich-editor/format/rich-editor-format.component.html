@@ -1,0 +1,196 @@
+<div class="format-toolbar">
+  <!-- Undo/Redo Section -->
+  <div class="toolbar-section">
+    <button mat-icon-button (click)="executeCommand('undo')" matTooltip="Undo">
+      <mat-icon>undo</mat-icon>
+    </button>
+    <button mat-icon-button (click)="executeCommand('redo')" matTooltip="Redo">
+      <mat-icon>redo</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider vertical></mat-divider>
+
+  <!-- Text Style Section -->
+  <div class="toolbar-section">
+    <mat-form-field appearance="outline" class="style-select">
+      <mat-select [(value)]="selectedStyle" (selectionChange)="onStyleChange($event)">
+        <mat-option value="p">Normal text</mat-option>
+        <mat-option value="h1">Heading 1</mat-option>
+        <mat-option value="h2">Heading 2</mat-option>
+        <mat-option value="h3">Heading 3</mat-option>
+        <mat-option value="h4">Heading 4</mat-option>
+        <mat-option value="h5">Heading 5</mat-option>
+        <mat-option value="h6">Heading 6</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="font-select">
+      <mat-select [(value)]="selectedFont" (selectionChange)="onFontChange($event)">
+        <mat-option value="Arial">Arial</mat-option>
+        <mat-option value="Helvetica">Helvetica</mat-option>
+        <mat-option value="Times New Roman">Times New Roman</mat-option>
+        <mat-option value="Georgia">Georgia</mat-option>
+        <mat-option value="Verdana">Verdana</mat-option>
+        <mat-option value="Courier New">Courier New</mat-option>
+        <mat-option value="Impact">Impact</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="size-select">
+      <mat-select [(value)]="selectedSize" (selectionChange)="onSizeChange($event)">
+        <mat-option value="10px">10</mat-option>
+        <mat-option value="12px">12</mat-option>
+        <mat-option value="14px">14</mat-option>
+        <mat-option value="16px">16</mat-option>
+        <mat-option value="18px">18</mat-option>
+        <mat-option value="20px">20</mat-option>
+        <mat-option value="24px">24</mat-option>
+        <mat-option value="28px">28</mat-option>
+        <mat-option value="32px">32</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <mat-divider vertical></mat-divider>
+
+  <!-- Text Formatting Section -->
+  <div class="toolbar-section">
+    <button mat-icon-button 
+            [class.active]="isFormatActive('bold')"
+            (click)="executeCommand('bold')" 
+            matTooltip="Bold (Ctrl+B)">
+      <mat-icon>format_bold</mat-icon>
+    </button>
+    <button mat-icon-button 
+            [class.active]="isFormatActive('italic')"
+            (click)="executeCommand('italic')" 
+            matTooltip="Italic (Ctrl+I)">
+      <mat-icon>format_italic</mat-icon>
+    </button>
+    <button mat-icon-button 
+            [class.active]="isFormatActive('underline')"
+            (click)="executeCommand('underline')" 
+            matTooltip="Underline (Ctrl+U)">
+      <mat-icon>format_underlined</mat-icon>
+    </button>
+    <button mat-icon-button 
+            [class.active]="isFormatActive('strikethrough')"
+            (click)="executeCommand('strikethrough')" 
+            matTooltip="Strikethrough">
+      <mat-icon>format_strikethrough</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider vertical></mat-divider>
+
+  <!-- Color Section -->
+  <div class="toolbar-section">
+    <div class="color-group">
+      <button mat-icon-button (click)="showTextColorPicker = !showTextColorPicker" matTooltip="Text Color">
+        <mat-icon>format_color_text</mat-icon>
+      </button>
+      <div class="color-picker" *ngIf="showTextColorPicker">
+        <div class="color-grid">
+          <button *ngFor="let color of textColors" 
+                  class="color-btn" 
+                  [style.background-color]="color"
+                  (click)="setTextColor(color)"
+                  [title]="color">
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="color-group">
+      <button mat-icon-button (click)="showHighlightPicker = !showHighlightPicker" matTooltip="Highlight">
+        <mat-icon>format_color_fill</mat-icon>
+      </button>
+      <div class="color-picker" *ngIf="showHighlightPicker">
+        <div class="color-grid">
+          <button *ngFor="let color of highlightColors" 
+                  class="color-btn" 
+                  [style.background-color]="color"
+                  (click)="setHighlightColor(color)"
+                  [title]="color">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <mat-divider vertical></mat-divider>
+
+  <!-- Alignment Section -->
+  <div class="toolbar-section">
+    <button mat-icon-button 
+            [class.active]="isAlignmentActive('left')"
+            (click)="executeCommand('justifyLeft')" 
+            matTooltip="Align Left">
+      <mat-icon>format_align_left</mat-icon>
+    </button>
+    <button mat-icon-button 
+            [class.active]="isAlignmentActive('center')"
+            (click)="executeCommand('justifyCenter')" 
+            matTooltip="Align Center">
+      <mat-icon>format_align_center</mat-icon>
+    </button>
+    <button mat-icon-button 
+            [class.active]="isAlignmentActive('right')"
+            (click)="executeCommand('justifyRight')" 
+            matTooltip="Align Right">
+      <mat-icon>format_align_right</mat-icon>
+    </button>
+    <button mat-icon-button 
+            [class.active]="isAlignmentActive('justify')"
+            (click)="executeCommand('justifyFull')" 
+            matTooltip="Justify">
+      <mat-icon>format_align_justify</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider vertical></mat-divider>
+
+  <!-- List Section -->
+  <div class="toolbar-section">
+    <button mat-icon-button 
+            [class.active]="isFormatActive('insertUnorderedList')"
+            (click)="executeCommand('insertUnorderedList')" 
+            matTooltip="Bullet List">
+      <mat-icon>format_list_bulleted</mat-icon>
+    </button>
+    <button mat-icon-button 
+            [class.active]="isFormatActive('insertOrderedList')"
+            (click)="executeCommand('insertOrderedList')" 
+            matTooltip="Numbered List">
+      <mat-icon>format_list_numbered</mat-icon>
+    </button>
+    <button mat-icon-button (click)="executeCommand('outdent')" matTooltip="Decrease Indent">
+      <mat-icon>format_indent_decrease</mat-icon>
+    </button>
+    <button mat-icon-button (click)="executeCommand('indent')" matTooltip="Increase Indent">
+      <mat-icon>format_indent_increase</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider vertical></mat-divider>
+
+  <!-- Link Section -->
+  <div class="toolbar-section">
+    <button mat-icon-button (click)="executeCommand('createLink')" matTooltip="Insert Link">
+      <mat-icon>link</mat-icon>
+    </button>
+    <button mat-icon-button (click)="executeCommand('unlink')" matTooltip="Remove Link">
+      <mat-icon>link_off</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider vertical></mat-divider>
+
+  <!-- Clear Formatting -->
+  <div class="toolbar-section">
+    <button mat-icon-button (click)="executeCommand('removeFormat')" matTooltip="Clear Formatting">
+      <mat-icon>format_clear</mat-icon>
+    </button>
+  </div>
+</div> 

@@ -60,6 +60,10 @@ import { TourLauncherComponent } from '../../shared/components/tour-launcher/tou
               <mat-icon>visibility</mat-icon>
               <span>Content Viewer</span>
             </a>
+            <a mat-list-item routerLink="/content-manager/stepbuilder/topic-stepbuilder-1" routerLinkActive="active" class="nav-item">
+              <mat-icon>construction</mat-icon>
+              <span>Step Builder</span>
+            </a>
           </div>
 
           <mat-divider class="nav-divider"></mat-divider>

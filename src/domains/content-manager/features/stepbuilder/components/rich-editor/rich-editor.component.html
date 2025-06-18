@@ -1,0 +1,58 @@
+<div class="rich-editor-container">
+  <!-- Editor Tabs -->
+  <mat-tab-group class="editor-tabs" dynamicHeight="true">
+    <mat-tab label="Format">
+      <div class="tab-content">
+        <app-rich-editor-format 
+          (formatCommand)="executeFormatCommand($event)"
+          [selectedText]="getSelectedText()">
+        </app-rich-editor-format>
+      </div>
+    </mat-tab>
+    
+    <mat-tab label="Insert">
+      <div class="tab-content">
+        <app-rich-editor-insert 
+          (insertCommand)="executeInsertCommand($event)"
+          (openModal)="openInsertModal($event)">
+        </app-rich-editor-insert>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Content Editor -->
+  <div class="editor-content">
+    <div 
+      #editorContent
+      class="content-editor"
+      contenteditable="true"
+      [innerHTML]="content"
+      (input)="onContentChange($event)"
+      (blur)="onContentBlur()"
+      (keydown)="onKeyDown($event)"
+      (mouseup)="onTextSelection()"
+      [attr.data-placeholder]="placeholder">
+    </div>
+  </div>
+</div>
+
+<!-- Insert Modals -->
+<app-video-insert-modal 
+  [(isOpen)]="modals.video"
+  (videoSelected)="onVideoInserted($event)">
+</app-video-insert-modal>
+
+<app-image-insert-modal 
+  [(isOpen)]="modals.image"
+  (imageSelected)="onImageInserted($event)">
+</app-image-insert-modal>
+
+<app-table-insert-modal 
+  [(isOpen)]="modals.table"
+  (tableSelected)="onTableInserted($event)">
+</app-table-insert-modal>
+
+<app-link-insert-modal 
+  [(isOpen)]="modals.link"
+  (linkSelected)="onLinkInserted($event)">
+</app-link-insert-modal> 

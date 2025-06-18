@@ -20,5 +20,9 @@ export const CONTENT_MANAGER_ROUTES: Routes = [
     path: 'content-viewer/:topicId',
     loadComponent: () => import('./features/content-viewer/pages/viewer-page/viewer-page.component').then(m => m.ViewerPageComponent)
   },
+  {
+    path: 'stepbuilder/:topicId',
+    loadComponent: () => import('./features/stepbuilder/pages/stepbuilder-page/stepbuilder-page.component').then(m => m.StepbuilderPageComponent)
+  },
   // Add any other top-level content manager domain routes here
 ]; 

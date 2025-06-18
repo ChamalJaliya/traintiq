@@ -1,0 +1,48 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-content">
+        <mat-icon class="header-icon">table_chart</mat-icon>
+        <h2>Insert Table</h2>
+      </div>
+      <button mat-icon-button (click)="close()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Rows</mat-label>
+          <input matInput [(ngModel)]="rows" type="number" min="1" max="20">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Columns</mat-label>
+          <input matInput [(ngModel)]="cols" type="number" min="1" max="10">
+        </mat-form-field>
+      </div>
+      
+      <div class="preview-section">
+        <h3>Preview ({{ rows }}x{{ cols }})</h3>
+        <div class="table-preview">
+          <table>
+            <tr *ngFor="let row of getPreviewRows(); let i = index">
+              <td *ngFor="let col of getPreviewCols(); let j = index" 
+                  [class.header]="i === 0">
+                {{ i === 0 ? 'Header' : 'Cell' }}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button mat-button (click)="close()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="insertTable()">
+        <mat-icon>add</mat-icon>
+        Insert Table
+      </button>
+    </div>
+  </div>
+</div> 

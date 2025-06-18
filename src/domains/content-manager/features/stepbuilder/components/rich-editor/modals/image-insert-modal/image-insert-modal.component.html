@@ -1,0 +1,55 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-content">
+        <mat-icon class="header-icon">image</mat-icon>
+        <h2>Insert Image</h2>
+      </div>
+      <button mat-icon-button (click)="close()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-section">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Image URL</mat-label>
+          <input matInput [(ngModel)]="imageUrl" placeholder="Enter image URL" type="url">
+          <mat-icon matSuffix>link</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-section">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Alt Text</mat-label>
+          <input matInput [(ngModel)]="altText" placeholder="Describe the image">
+          <mat-icon matSuffix>description</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-section">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Caption (Optional)</mat-label>
+          <input matInput [(ngModel)]="caption" placeholder="Image caption">
+          <mat-icon matSuffix>text_fields</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="preview-section" *ngIf="imageUrl">
+        <h3>Preview</h3>
+        <div class="image-preview">
+                      <img [src]="imageUrl" [alt]="altText" (error)="hideImage($event)">
+          <p *ngIf="caption" class="caption">{{ caption }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button mat-button (click)="close()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="insertImage()" [disabled]="!imageUrl">
+        <mat-icon>add</mat-icon>
+        Insert Image
+      </button>
+    </div>
+  </div>
+</div> 
