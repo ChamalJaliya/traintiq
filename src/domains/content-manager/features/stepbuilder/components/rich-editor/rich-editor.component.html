@@ -1,24 +1,26 @@
 <div class="rich-editor-container">
-  <!-- Editor Tabs -->
-  <mat-tab-group class="editor-tabs" dynamicHeight="true">
-    <mat-tab label="Format">
-      <div class="tab-content">
-        <app-rich-editor-format 
-          (formatCommand)="executeFormatCommand($event)"
-          [selectedText]="getSelectedText()">
-        </app-rich-editor-format>
-      </div>
-    </mat-tab>
-    
-    <mat-tab label="Insert">
-      <div class="tab-content">
-        <app-rich-editor-insert 
-          (insertCommand)="executeInsertCommand($event)"
-          (openModal)="openInsertModal($event)">
-        </app-rich-editor-insert>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
+  <!-- Editor Tabs - Two Row Layout -->
+  <div class="editor-tabs-container">
+    <mat-tab-group class="editor-tabs" dynamicHeight="true">
+      <mat-tab label="FORMAT">
+        <div class="tab-content format-content">
+          <app-rich-editor-format 
+            (formatCommand)="executeFormatCommand($event)"
+            [selectedText]="getSelectedText()">
+          </app-rich-editor-format>
+        </div>
+      </mat-tab>
+      
+      <mat-tab label="INSERT">
+        <div class="tab-content insert-content">
+          <app-rich-editor-insert 
+            (insertCommand)="executeInsertCommand($event)"
+            (openModal)="openInsertModal($event)">
+          </app-rich-editor-insert>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
 
   <!-- Content Editor -->
   <div class="editor-content">
@@ -26,6 +28,7 @@
       #editorContent
       class="content-editor"
       contenteditable="true"
+      dir="ltr"
       [innerHTML]="content"
       (input)="onContentChange($event)"
       (blur)="onContentBlur()"
@@ -55,4 +58,9 @@
 <app-link-insert-modal 
   [(isOpen)]="modals.link"
   (linkSelected)="onLinkInserted($event)">
-</app-link-insert-modal> 
+</app-link-insert-modal>
+
+<app-file-upload-modal 
+  [(isOpen)]="modals.file"
+  (fileSelected)="onFileUploaded($event)">
+</app-file-upload-modal> 

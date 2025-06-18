@@ -1,1 +1,99 @@
- 
+<div class="insert-toolbar">
+  <!-- Professional compact grid layout -->
+  <div class="professional-insert-grid">
+    <!-- Row 1: Media -->
+    <button mat-stroked-button class="insert-tool media" (click)="onInsert('video')" matTooltip="Insert Video">
+      <mat-icon>video_library</mat-icon>
+      <span>Video</span>
+    </button>
+    <button mat-stroked-button class="insert-tool media" (click)="onInsert('image')" matTooltip="Insert Image">
+      <mat-icon>image</mat-icon>
+      <span>Image</span>
+    </button>
+    <button mat-stroked-button class="insert-tool media" (click)="onInsert('audio')" matTooltip="Insert Audio">
+      <mat-icon>audiotrack</mat-icon>
+      <span>Audio</span>
+    </button>
+    <button mat-stroked-button class="insert-tool media" (click)="onInsert('file')" matTooltip="Attach File">
+      <mat-icon>attach_file</mat-icon>
+      <span>File</span>
+    </button>
+
+    <!-- Row 2: Elements -->
+    <button mat-stroked-button class="insert-tool elements" (click)="onInsert('table')" matTooltip="Insert Table">
+      <mat-icon>table_chart</mat-icon>
+      <span>Table</span>
+    </button>
+    <button mat-stroked-button class="insert-tool elements" (click)="onInsert('link')" matTooltip="Insert Link">
+      <mat-icon>link</mat-icon>
+      <span>Link</span>
+    </button>
+    <button mat-stroked-button class="insert-tool elements" (click)="onInsert('iframe')" matTooltip="Embed Content">
+      <mat-icon>web</mat-icon>
+      <span>Embed</span>
+    </button>
+    <button mat-stroked-button class="insert-tool elements" (click)="onInsert('divider')" matTooltip="Insert Divider">
+      <mat-icon>horizontal_rule</mat-icon>
+      <span>Divider</span>
+    </button>
+
+    <!-- Row 3: Interactive -->
+    <button mat-stroked-button class="insert-tool interactive" (click)="toggleEmojiPicker()" matTooltip="Insert Emoji">
+      <mat-icon>emoji_emotions</mat-icon>
+      <span>Emoji</span>
+    </button>
+    <button mat-stroked-button class="insert-tool interactive" (click)="toggleIconPicker()" matTooltip="Insert Icon">
+      <mat-icon>star</mat-icon>
+      <span>Icon</span>
+    </button>
+    <button mat-stroked-button class="insert-tool interactive" (click)="onInsert('columns')" matTooltip="Insert Columns">
+      <mat-icon>view_week</mat-icon>
+      <span>Columns</span>
+    </button>
+    <button mat-stroked-button class="insert-tool interactive" (click)="onInsert('module')" matTooltip="Training Module">
+      <mat-icon>school</mat-icon>
+      <span>Module</span>
+    </button>
+  </div>
+
+  <!-- Background Overlay for Pickers -->
+  <div class="picker-overlay" *ngIf="showEmojiPicker || showIconPicker" (click)="closeAllPickers()"></div>
+
+  <!-- Emoji Picker -->
+  <div class="emoji-picker" *ngIf="showEmojiPicker" (click)="$event.stopPropagation()">
+    <div class="picker-header">
+      <h4>Select Emoji</h4>
+      <button mat-icon-button (click)="showEmojiPicker = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="emoji-grid">
+      <button 
+        *ngFor="let emoji of emojis" 
+        class="emoji-btn" 
+        (click)="insertEmoji(emoji)"
+        [title]="emoji">
+        {{ emoji }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Icon Picker -->
+  <div class="icon-picker" *ngIf="showIconPicker" (click)="$event.stopPropagation()">
+    <div class="picker-header">
+      <h4>Select Icon</h4>
+      <button mat-icon-button (click)="showIconPicker = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="icon-grid">
+      <button 
+        *ngFor="let icon of materialIcons" 
+        class="icon-btn" 
+        (click)="insertIcon(icon)"
+        [title]="icon">
+        <mat-icon>{{ icon }}</mat-icon>
+      </button>
+    </div>
+  </div>
+</div> 

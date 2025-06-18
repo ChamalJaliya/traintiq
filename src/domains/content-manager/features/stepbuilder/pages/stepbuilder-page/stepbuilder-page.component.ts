@@ -209,6 +209,30 @@ export class StepbuilderPageComponent implements OnInit, OnDestroy {
     this.subscriptions.push(sub);
   }
 
+  onAddStep(): void {
+    if (!this.topic) return;
+    
+    const newStep: StepBuilderStep = {
+      id: 'step-' + Date.now(),
+      title: 'New Step',
+      description: 'Enter step description',
+      content: '',
+      estimatedDuration: 15,
+      interactive: false,
+      completed: false,
+      status: StepBuilderStatus.IN_PROGRESS,
+      mediaType: StepMediaType.VIDEO,
+      videoUrl: '',
+      attachments: [],
+      order: this.topic.steps.length + 1
+    };
+    
+    // Add step directly to the topic for now
+    this.topic.steps.push(newStep);
+    this.navigateToStep(this.topic.steps.length - 1);
+    this.snackBar.open('New step added successfully!', 'Close', { duration: 2000 });
+  }
+
   onMarkCompleted(): void {
     if (!this.currentStep) return;
     

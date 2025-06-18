@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +13,7 @@ import { VideoInsertModalComponent } from './modals/video-insert-modal/video-ins
 import { ImageInsertModalComponent } from './modals/image-insert-modal/image-insert-modal.component';
 import { TableInsertModalComponent } from './modals/table-insert-modal/table-insert-modal.component';
 import { LinkInsertModalComponent } from './modals/link-insert-modal/link-insert-modal.component';
+import { FileUploadModalComponent } from './modals/file-upload-modal/file-upload-modal.component';
 
 @Component({
   selector: 'app-rich-editor',
@@ -31,12 +32,13 @@ import { LinkInsertModalComponent } from './modals/link-insert-modal/link-insert
     VideoInsertModalComponent,
     ImageInsertModalComponent,
     TableInsertModalComponent,
-    LinkInsertModalComponent
+    LinkInsertModalComponent,
+    FileUploadModalComponent
   ],
   templateUrl: './rich-editor.component.html',
   styleUrls: ['./rich-editor.component.scss']
 })
-export class RichEditorComponent implements OnInit {
+export class RichEditorComponent implements OnInit, AfterViewInit {
   @Input() content: string = '';
   @Input() placeholder: string = 'Start typing...';
   @Output() contentChange = new EventEmitter<string>();
@@ -49,7 +51,8 @@ export class RichEditorComponent implements OnInit {
     video: false,
     image: false,
     table: false,
-    link: false
+    link: false,
+    file: false
   };
 
   ngOnInit() {
@@ -59,8 +62,30 @@ export class RichEditorComponent implements OnInit {
     }
   }
 
+  ngAfterViewInit() {
+    this.forceCorrectDirection();
+  }
+
+  private forceCorrectDirection() {
+    if (this.editorContent) {
+      const editor = this.editorContent.nativeElement;
+      editor.style.direction = 'ltr';
+      editor.style.textAlign = 'start';
+      editor.style.unicodeBidi = 'embed';
+      editor.style.writingMode = 'horizontal-tb';
+      editor.setAttribute('dir', 'ltr');
+    }
+  }
+
   onContentChange(event: Event) {
     const target = event.target as HTMLDivElement;
+    
+    // Force LTR direction and proper text flow
+    target.style.direction = 'ltr';
+    target.style.textAlign = 'start';
+    target.style.unicodeBidi = 'embed';
+    target.style.writingMode = 'horizontal-tb';
+    
     this.content = target.innerHTML;
     this.contentChange.emit(this.content);
   }
@@ -84,6 +109,24 @@ export class RichEditorComponent implements OnInit {
         case 'u':
           event.preventDefault();
           this.executeFormatCommand({ type: 'underline' });
+          break;
+        case 'z':
+          event.preventDefault();
+          if (event.shiftKey) {
+            // Ctrl+Shift+Z = Redo
+            console.log('Redo triggered via Ctrl+Shift+Z');
+            this.executeFormatCommand({ type: 'redo' });
+          } else {
+            // Ctrl+Z = Undo
+            console.log('Undo triggered via Ctrl+Z');
+            this.executeFormatCommand({ type: 'undo' });
+          }
+          break;
+        case 'y':
+          // Ctrl+Y = Redo (alternative)
+          event.preventDefault();
+          console.log('Redo triggered via Ctrl+Y');
+          this.executeFormatCommand({ type: 'redo' });
           break;
       }
     }
@@ -123,6 +166,8 @@ export class RichEditorComponent implements OnInit {
         document.execCommand('fontName', false, command.value);
         break;
       case 'fontSize':
+        // Use execCommand for better compatibility
+        document.execCommand('fontSize', false, '7'); // Set to largest first
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
@@ -136,6 +181,7 @@ export class RichEditorComponent implements OnInit {
               range.insertNode(span);
             }
             selection.removeAllRanges();
+            selection.addRange(range);
           }
         }
         break;
@@ -207,6 +253,9 @@ export class RichEditorComponent implements OnInit {
       case 'link':
         this.openInsertModal('link');
         break;
+      case 'file':
+        this.openInsertModal('file');
+        break;
       case 'emoji':
         this.insertEmoji(command.value);
         break;
@@ -226,7 +275,7 @@ export class RichEditorComponent implements OnInit {
   }
 
   openInsertModal(type: string) {
-    this.modals = { video: false, image: false, table: false, link: false };
+    this.modals = { video: false, image: false, table: false, link: false, file: false };
     (this.modals as any)[type] = true;
   }
 
@@ -244,6 +293,14 @@ export class RichEditorComponent implements OnInit {
 
   onLinkInserted(linkData: any) {
     this.insertLink(linkData.url, linkData.text);
+  }
+
+  onFileUploaded(fileData: any) {
+    if (fileData.files && fileData.files.length > 0) {
+      fileData.files.forEach((file: any) => {
+        this.insertFile(file.name, file.url, file.size);
+      });
+    }
   }
 
   private insertImage(src: string, alt: string = '', caption: string = '') {
@@ -298,16 +355,38 @@ export class RichEditorComponent implements OnInit {
   }
 
   private insertEmoji(emoji: string) {
+    console.log('Rich editor inserting emoji:', emoji); // Debug log
     const editor = this.editorContent.nativeElement;
+    
+    // Make sure editor is focused and has cursor position
     editor.focus();
-    document.execCommand('insertHTML', false, emoji);
+    
+    // Create a selection range if one doesn't exist
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      // Set cursor to end of content
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+    
+    // Insert emoji with space
+    const emojiWithSpace = emoji + ' ';
+    const success = document.execCommand('insertHTML', false, emojiWithSpace);
+    
+    console.log('Emoji insertion success:', success, 'Content:', editor.innerHTML);
+    
+    // Trigger content change
     this.onContentChange({ target: editor } as any);
   }
 
   private insertIcon(icon: string) {
+    console.log('Rich editor inserting icon:', icon); // Debug log
     const editor = this.editorContent.nativeElement;
     editor.focus();
-    const html = `<mat-icon class="inline-icon">${icon}</mat-icon>`;
+    const html = `<span class="inline-icon" style="font-family: 'Material Icons'; font-size: 18px; color: #1976d2; margin: 0 4px;">${icon}</span> `;
     document.execCommand('insertHTML', false, html);
     this.onContentChange({ target: editor } as any);
   }
@@ -325,5 +404,26 @@ export class RichEditorComponent implements OnInit {
     editor.focus();
     document.execCommand('insertHTML', false, html);
     this.onContentChange({ target: editor } as any);
+  }
+
+  private insertFile(name: string, url: string, size: number) {
+    const editor = this.editorContent.nativeElement;
+    editor.focus();
+    const fileSize = this.formatFileSize(size);
+    const html = `<div class="file-attachment">
+      <mat-icon>attach_file</mat-icon>
+      <a href="${url}" target="_blank">${name}</a>
+      <span class="file-size">(${fileSize})</span>
+    </div>`;
+    document.execCommand('insertHTML', false, html);
+    this.onContentChange({ target: editor } as any);
+  }
+
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 } 

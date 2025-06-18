@@ -1,0 +1,74 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Upload Files</h3>
+      <button mat-icon-button (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <!-- Drag & Drop Area -->
+      <div 
+        class="drop-zone"
+        [class.drag-over]="dragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+        
+        <div class="drop-zone-content">
+          <mat-icon class="upload-icon">cloud_upload</mat-icon>
+          <h4>Drag & drop files here</h4>
+          <p>or click to browse</p>
+          <input 
+            #fileInput
+            type="file" 
+            multiple 
+            hidden 
+            (change)="onFileSelect($event)">
+          <button mat-raised-button color="primary" (click)="fileInput.click()">
+            Browse Files
+          </button>
+        </div>
+      </div>
+
+      <!-- Selected Files List -->
+      <div class="selected-files" *ngIf="selectedFiles.length > 0">
+        <h4>Selected Files ({{ selectedFiles.length }})</h4>
+        <div class="files-list">
+          <mat-card class="file-item" *ngFor="let file of selectedFiles; let i = index">
+            <div class="file-info">
+              <mat-icon class="file-icon">{{ getFileIcon(file) }}</mat-icon>
+              <div class="file-details">
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              </div>
+            </div>
+            <button mat-icon-button (click)="removeFile(i)" class="remove-btn">
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- Upload Progress -->
+      <div class="upload-progress" *ngIf="uploading">
+        <h4>Uploading...</h4>
+        <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+        <span class="progress-text">{{ uploadProgress }}%</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button mat-button (click)="close()">Cancel</button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="uploadFiles()"
+        [disabled]="selectedFiles.length === 0 || uploading">
+        <mat-icon>cloud_upload</mat-icon>
+        Upload Files
+      </button>
+    </div>
+  </div>
+</div> 

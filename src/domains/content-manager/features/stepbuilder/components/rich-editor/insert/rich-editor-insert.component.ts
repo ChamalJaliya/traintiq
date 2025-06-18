@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-rich-editor-insert',
@@ -11,7 +12,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDividerModule
   ],
   templateUrl: './rich-editor-insert.component.html',
   styleUrls: ['./rich-editor-insert.component.scss']
@@ -41,19 +43,13 @@ export class RichEditorInsertComponent {
   ];
 
   onInsert(type: string) {
-    if (['video', 'image', 'table', 'link'].includes(type)) {
+    if (['video', 'image', 'table', 'link', 'file'].includes(type)) {
       this.openModal.emit(type);
     } else {
       // Handle direct insert commands
       switch (type) {
         case 'audio':
           this.insertCommand.emit({ type: 'html', value: '<audio controls><source src="" type="audio/mpeg">Your browser does not support the audio element.</audio>' });
-          break;
-        case 'screen':
-          this.insertCommand.emit({ type: 'html', value: '<div class="screen-capture-placeholder">Screen capture will be inserted here</div>' });
-          break;
-        case 'file':
-          this.insertCommand.emit({ type: 'html', value: '<div class="file-attachment"><mat-icon>attach_file</mat-icon> Attached file</div>' });
           break;
         case 'iframe':
           const iframeUrl = prompt('Enter iframe URL:');
@@ -90,12 +86,19 @@ export class RichEditorInsertComponent {
   }
 
   insertEmoji(emoji: string) {
+    console.log('Inserting emoji:', emoji); // Debug log
     this.insertCommand.emit({ type: 'emoji', value: emoji });
     this.showEmojiPicker = false;
   }
 
   insertIcon(icon: string) {
+    console.log('Inserting icon:', icon); // Debug log
     this.insertCommand.emit({ type: 'icon', value: icon });
+    this.showIconPicker = false;
+  }
+
+  closeAllPickers() {
+    this.showEmojiPicker = false;
     this.showIconPicker = false;
   }
 

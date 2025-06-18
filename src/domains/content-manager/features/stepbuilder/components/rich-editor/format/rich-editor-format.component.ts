@@ -53,10 +53,12 @@ export class RichEditorFormatComponent {
   }
 
   onFontChange(event: any) {
+    this.selectedFont = event.value;
     this.formatCommand.emit({ type: 'fontName', value: event.value });
   }
 
   onSizeChange(event: any) {
+    this.selectedSize = event.value;
     this.formatCommand.emit({ type: 'fontSize', value: event.value });
   }
 
@@ -94,8 +96,20 @@ export class RichEditorFormatComponent {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    
+    // Don't close if clicking on color picker elements
+    if (target.closest('.color-group') || target.closest('.color-picker')) {
+      return;
+    }
+    
     // Close color pickers when clicking outside
     this.showTextColorPicker = false;
     this.showHighlightPicker = false;
+  }
+
+  // Prevent color picker from closing when clicking inside
+  onColorPickerClick(event: Event) {
+    event.stopPropagation();
   }
 } 

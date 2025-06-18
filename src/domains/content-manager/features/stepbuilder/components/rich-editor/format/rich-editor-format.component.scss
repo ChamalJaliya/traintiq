@@ -1,12 +1,30 @@
+:host {
+  display: block;
+  width: 100%;
+  direction: ltr !important;
+  
+  * {
+    direction: ltr !important;
+    text-align: start !important;
+    unicode-bidi: embed !important;
+    writing-mode: horizontal-tb !important;
+  }
+}
+
 .format-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  padding: 12px 16px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-bottom: 1px solid #e2e8f0;
-  gap: 8px;
-  min-height: 64px;
+  gap: 12px;
+  min-height: 72px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .toolbar-group {
@@ -116,90 +134,85 @@
   width: 80px;
 }
 
-// Color picker styling
-.color-picker-container {
+// Color picker styling - Fixed to match HTML structure
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.color-group {
+  position: relative;
+  display: inline-block;
+}
+
+.color-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 9999 !important;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  margin-top: 4px;
+  border: 1px solid #e2e8f0;
+  animation: slideDown 0.2s ease-out;
+  min-width: 200px;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 12px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-bottom: none;
+    border-right: none;
+    transform: rotate(45deg);
+  }
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.color-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
   position: relative;
   
-  .color-btn {
-    position: relative;
+  &:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-color: #1976d2;
+  }
+  
+  &.selected {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
     
-    .color-indicator {
+    &::after {
+      content: '✓';
       position: absolute;
-      bottom: 2px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      width: 16px;
-      height: 3px;
-      border-radius: 2px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    }
-  }
-  
-  .color-picker {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-    padding: 12px;
-    margin-top: 4px;
-    border: 1px solid #e2e8f0;
-    animation: slideDown 0.2s ease-out;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: -6px;
-      left: 12px;
-      width: 12px;
-      height: 12px;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-bottom: none;
-      border-right: none;
-      transform: rotate(45deg);
-    }
-  }
-  
-  .color-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 6px;
-    min-width: 200px;
-  }
-  
-  .color-swatch {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    
-    &:hover {
-      transform: scale(1.2);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      z-index: 1;
-    }
-    
-    &.selected {
-      border-color: #1976d2;
-      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.3);
-      
-      &::after {
-        content: '✓';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: white;
-        font-size: 10px;
-        font-weight: bold;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-      }
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
   }
 }

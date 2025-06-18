@@ -90,7 +90,7 @@
       <button mat-icon-button (click)="showTextColorPicker = !showTextColorPicker" matTooltip="Text Color">
         <mat-icon>format_color_text</mat-icon>
       </button>
-      <div class="color-picker" *ngIf="showTextColorPicker">
+      <div class="color-picker" *ngIf="showTextColorPicker" (click)="onColorPickerClick($event)">
         <div class="color-grid">
           <button *ngFor="let color of textColors" 
                   class="color-btn" 
@@ -106,7 +106,7 @@
       <button mat-icon-button (click)="showHighlightPicker = !showHighlightPicker" matTooltip="Highlight">
         <mat-icon>format_color_fill</mat-icon>
       </button>
-      <div class="color-picker" *ngIf="showHighlightPicker">
+      <div class="color-picker" *ngIf="showHighlightPicker" (click)="onColorPickerClick($event)">
         <div class="color-grid">
           <button *ngFor="let color of highlightColors" 
                   class="color-btn" 
